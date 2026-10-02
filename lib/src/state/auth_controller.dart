@@ -7,6 +7,7 @@ import '../services/api_client.dart';
 import '../services/events_service.dart';
 import '../services/grpc_connection.dart';
 import '../services/token_store.dart';
+import 'p2p_controller.dart';
 
 enum AuthStatus { loading, signedOut, signedIn }
 
@@ -30,9 +31,7 @@ final apiClientProvider = Provider<ApiClient>(
 );
 
 final eventsServiceProvider = Provider<EventsService>((ref) {
-  final service = EventsService(
-    connection: ref.watch(grpcConnectionProvider),
-  );
+  final service = EventsService(connection: ref.watch(grpcConnectionProvider));
   ref.onDispose(service.dispose);
   return service;
 });
@@ -43,6 +42,7 @@ class AuthController extends Notifier<AuthState> {
     final api = ref.read(apiClientProvider);
     api.onUnauthorized = () {
       ref.read(eventsServiceProvider).stop();
+      ref.read(p2pControllerProvider.notifier).stop();
       state = const AuthState(AuthStatus.signedOut);
     };
     unawaited(_restore());
@@ -59,6 +59,7 @@ class AuthController extends Notifier<AuthState> {
     if (res.data != null) {
       state = AuthState(AuthStatus.signedIn, res.data);
       ref.read(eventsServiceProvider).start();
+      ref.read(p2pControllerProvider.notifier).start();
     } else {
       state = const AuthState(AuthStatus.signedOut);
     }
@@ -76,11 +77,13 @@ class AuthController extends Notifier<AuthState> {
     }
     state = AuthState(AuthStatus.signedIn, me.data);
     ref.read(eventsServiceProvider).start();
+    ref.read(p2pControllerProvider.notifier).start();
     return null;
   }
 
   Future<void> signOut() async {
     ref.read(eventsServiceProvider).stop();
+    ref.read(p2pControllerProvider.notifier).stop();
     await ref.read(apiClientProvider).revoke();
     state = const AuthState(AuthStatus.signedOut);
   }
@@ -93,5 +96,6 @@ class AuthController extends Notifier<AuthState> {
   }
 }
 
-final authControllerProvider =
-    NotifierProvider<AuthController, AuthState>(AuthController.new);
+final authControllerProvider = NotifierProvider<AuthController, AuthState>(
+  AuthController.new,
+);

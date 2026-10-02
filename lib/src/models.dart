@@ -18,14 +18,14 @@ class FileItem {
   final int? version;
 
   factory FileItem.fromJson(Map<String, dynamic> json) => FileItem(
-        name: json['name'] as String? ?? '',
-        path: json['path'] as String? ?? '',
-        size: (json['size'] as num?)?.toInt() ?? 0,
-        isDir: json['isDir'] as bool? ?? false,
-        modified: json['modified'] as String? ?? '',
-        mimeType: json['mimeType'] as String?,
-        version: (json['version'] as num?)?.toInt(),
-      );
+    name: json['name'] as String? ?? '',
+    path: json['path'] as String? ?? '',
+    size: (json['size'] as num?)?.toInt() ?? 0,
+    isDir: json['isDir'] as bool? ?? false,
+    modified: json['modified'] as String? ?? '',
+    mimeType: json['mimeType'] as String?,
+    version: (json['version'] as num?)?.toInt(),
+  );
 }
 
 class AuthUser {
@@ -52,18 +52,18 @@ class AuthUser {
   final int? files;
 
   factory AuthUser.fromJson(Map<String, dynamic> json) => AuthUser(
-        username: json['username'] as String? ?? '',
-        isAdmin: json['isAdmin'] as bool? ?? false,
-        role: json['role'] as String?,
-        enabled: json['enabled'] as bool?,
-        permissions: (json['permissions'] as List?)
-            ?.map((e) => e.toString())
-            .toList(),
-        createdAt: json['createdAt'] as String?,
-        quotaBytes: (json['quotaBytes'] as num?)?.toInt(),
-        size: (json['size'] as num?)?.toInt(),
-        files: (json['files'] as num?)?.toInt(),
-      );
+    username: json['username'] as String? ?? '',
+    isAdmin: json['isAdmin'] as bool? ?? false,
+    role: json['role'] as String?,
+    enabled: json['enabled'] as bool?,
+    permissions: (json['permissions'] as List?)
+        ?.map((e) => e.toString())
+        .toList(),
+    createdAt: json['createdAt'] as String?,
+    quotaBytes: (json['quotaBytes'] as num?)?.toInt(),
+    size: (json['size'] as num?)?.toInt(),
+    files: (json['files'] as num?)?.toInt(),
+  );
 }
 
 class ShareItem {
@@ -84,13 +84,13 @@ class ShareItem {
   final String expiresAt;
 
   factory ShareItem.fromJson(Map<String, dynamic> json) => ShareItem(
-        token: json['token'] as String? ?? '',
-        path: json['path'] as String? ?? '',
-        name: json['name'] as String? ?? '',
-        owner: json['owner'] as String? ?? '',
-        createdAt: json['createdAt'] as String? ?? '',
-        expiresAt: json['expiresAt'] as String? ?? '',
-      );
+    token: json['token'] as String? ?? '',
+    path: json['path'] as String? ?? '',
+    name: json['name'] as String? ?? '',
+    owner: json['owner'] as String? ?? '',
+    createdAt: json['createdAt'] as String? ?? '',
+    expiresAt: json['expiresAt'] as String? ?? '',
+  );
 }
 
 class TokenResponse {
@@ -105,10 +105,10 @@ class TokenResponse {
   final int expiresIn;
 
   factory TokenResponse.fromJson(Map<String, dynamic> json) => TokenResponse(
-        accessToken: json['accessToken'] as String? ?? '',
-        tokenType: json['tokenType'] as String? ?? '',
-        expiresIn: (json['expiresIn'] as num?)?.toInt() ?? 0,
-      );
+    accessToken: json['accessToken'] as String? ?? '',
+    tokenType: json['tokenType'] as String? ?? '',
+    expiresIn: (json['expiresIn'] as num?)?.toInt() ?? 0,
+  );
 }
 
 class ServerEvent {
@@ -120,11 +120,11 @@ class ServerEvent {
   final String? at;
 
   factory ServerEvent.fromJson(Map<String, dynamic> json) => ServerEvent(
-        type: json['type'] as String? ?? '',
-        path: json['path'] as String?,
-        user: json['user'] as String?,
-        at: json['at'] as String?,
-      );
+    type: json['type'] as String? ?? '',
+    path: json['path'] as String?,
+    user: json['user'] as String?,
+    at: json['at'] as String?,
+  );
 }
 
 class ApiResult<T> {
@@ -138,4 +138,206 @@ class ApiResult<T> {
   final bool unauthorized;
 
   bool get ok => error == null && !unauthorized;
+}
+
+/// One connected peer session, as reported by the signaling server.
+class P2PPeer {
+  const P2PPeer({required this.id, this.user});
+
+  final String id;
+  final String? user;
+
+  factory P2PPeer.fromJson(Map<String, dynamic> json) =>
+      P2PPeer(id: json['id'] as String? ?? '', user: json['user'] as String?);
+}
+
+/// The relayed frame kinds — the backend's `P2PSignal*` constants.
+enum P2PSignalKind { offer, answer, candidate, bye }
+
+/// Maps a wire value onto [P2PSignalKind]; unknown kinds yield null so a
+/// future backend addition is ignored rather than crashing the session.
+P2PSignalKind? p2pSignalKindFrom(String raw) {
+  switch (raw) {
+    case 'offer':
+      return P2PSignalKind.offer;
+    case 'answer':
+      return P2PSignalKind.answer;
+    case 'candidate':
+      return P2PSignalKind.candidate;
+    case 'bye':
+      return P2PSignalKind.bye;
+    default:
+      return null;
+  }
+}
+
+/// One SDP/ICE/bye frame relayed between two peers. [payload] is opaque to
+/// the app — an SDP description for offer/answer, an ICE candidate dict for
+/// candidate — and is handed straight back to WebRTC.
+class P2PSignalFrame {
+  const P2PSignalFrame({
+    required this.from,
+    required this.to,
+    required this.kind,
+    this.payload,
+  });
+
+  final String from;
+  final String to;
+  final P2PSignalKind kind;
+  final Object? payload;
+}
+
+/// One decoded `data:` payload from the `/api/p2p/stream` SSE stream.
+class P2PFrame {
+  const P2PFrame({
+    required this.type,
+    this.peerId,
+    this.peers = const <P2PPeer>[],
+    this.signal,
+  });
+
+  /// `hello`, `peers` or `signal`.
+  final String type;
+  final String? peerId;
+  final List<P2PPeer> peers;
+  final P2PSignalFrame? signal;
+}
+
+/// Decodes one SSE payload. Returns null when the frame carries nothing the
+/// client can use (unknown signal kind, malformed signal).
+P2PFrame? p2pFrameFromJson(Map<String, dynamic> json) {
+  final rawSignal = json['signal'];
+  final signal = rawSignal is Map<String, dynamic>
+      ? p2pSignalFromJson(rawSignal)
+      : null;
+  if (rawSignal is Map<String, dynamic> && signal == null) return null;
+
+  return P2PFrame(
+    type: json['type'] as String? ?? '',
+    peerId: json['peerId'] as String?,
+    peers: [
+      for (final peer in (json['peers'] as List<dynamic>? ?? const []))
+        if (peer is Map<String, dynamic>) P2PPeer.fromJson(peer),
+    ],
+    signal: signal,
+  );
+}
+
+P2PSignalFrame? p2pSignalFromJson(Map<String, dynamic> json) {
+  final kind = p2pSignalKindFrom(json['kind'] as String? ?? '');
+  if (kind == null) return null;
+  return P2PSignalFrame(
+    from: json['from'] as String? ?? '',
+    to: json['to'] as String? ?? '',
+    kind: kind,
+    payload: json['payload'],
+  );
+}
+
+/// A control frame sent over the data channel to bracket a file's bytes.
+///
+/// The channel carries interleaved JSON control frames and raw binary
+/// chunks; `meta` opens a transfer, `end` completes it, `error` aborts it.
+class P2PControlMessage {
+  const P2PControlMessage({
+    required this.type,
+    this.id,
+    this.name,
+    this.size,
+    this.mime,
+  });
+
+  /// `meta`, `end` or `error`.
+  final String type;
+  final String? id;
+  final String? name;
+  final int? size;
+  final String? mime;
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    't': type,
+    if (id != null) 'id': id,
+    if (name != null) 'name': name,
+    if (size != null) 'size': size,
+    if (mime != null) 'mime': mime,
+  };
+
+  factory P2PControlMessage.fromJson(Map<String, dynamic> json) =>
+      P2PControlMessage(
+        type: json['t'] as String? ?? '',
+        id: json['id'] as String?,
+        name: json['name'] as String?,
+        size: (json['size'] as num?)?.toInt(),
+        mime: json['mime'] as String?,
+      );
+}
+
+enum P2PTransferStatus { connecting, active, done, error }
+
+enum P2PTransferDirection { send, receive }
+
+/// One file moving between two peers. Kept immutable — progress updates go
+/// through [copyWith] so a transfer is cheap to rebuild in the UI.
+class P2PTransfer {
+  const P2PTransfer({
+    required this.id,
+    required this.peerId,
+    required this.name,
+    required this.size,
+    required this.direction,
+    this.peerLabel,
+    this.loaded = 0,
+    this.status = P2PTransferStatus.connecting,
+    this.error,
+    this.localPath,
+  });
+
+  final String id;
+  final String peerId;
+  final String? peerLabel;
+  final String name;
+  final int size;
+  final int loaded;
+  final P2PTransferStatus status;
+  final P2PTransferDirection direction;
+  final String? error;
+
+  /// Where a received file was written, once it is complete.
+  final String? localPath;
+
+  /// Progress in `[0, 1]`, clamped so a late or duplicate update can never
+  /// push the bar past full. A size of zero reports 0 until it completes, so
+  /// a zero-byte file never renders as "done" at 0%.
+  double get progress {
+    if (size <= 0) return status == P2PTransferStatus.done ? 1 : 0;
+    final value = loaded / size;
+    if (value <= 0) return 0;
+    if (value >= 1) return 1;
+    return value;
+  }
+
+  /// Whether the transfer still needs bytes from the wire.
+  bool get isComplete => status == P2PTransferStatus.done;
+
+  P2PTransfer copyWith({
+    int? loaded,
+    P2PTransferStatus? status,
+    String? error,
+    String? localPath,
+    String? peerLabel,
+  }) {
+    return P2PTransfer(
+      id: id,
+      peerId: peerId,
+      name: name,
+      size: size,
+      direction: direction,
+      peerLabel: peerLabel ?? this.peerLabel,
+      loaded: loaded ?? this.loaded,
+      status: status ?? this.status,
+      error: error ?? this.error,
+      localPath: localPath ?? this.localPath,
+    );
+  }
 }

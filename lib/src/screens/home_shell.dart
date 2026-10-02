@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme.dart';
 import 'account_screen.dart';
 import 'files_screen.dart';
+import 'p2p_screen.dart';
 import 'shares_screen.dart';
 
 class HomeShell extends StatefulWidget {
@@ -18,6 +19,7 @@ class _HomeShellState extends State<HomeShell> {
   late final List<Widget> _screens = [
     FilesScreen(onOpenShares: () => setState(() => _index = 1)),
     const SharesScreen(),
+    const P2PScreen(),
     const AccountScreen(),
   ];
 
@@ -41,6 +43,10 @@ class _HomeShellState extends State<HomeShell> {
               label: 'Files',
             ),
             BottomNavigationBarItem(icon: Icon(Icons.link), label: 'Shares'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.devices_other),
+              label: 'Direct',
+            ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               label: 'Account',
