@@ -1,15 +1,19 @@
 # FileShare — Mobile (Flutter)
 
 Flutter app for the Simple File Share server: browse and upload files, manage
-share links, watch usage, and react to live server events over the gRPC
-`EventsService.Subscribe` stream.
+share links, watch usage, react to live server events over the gRPC
+`EventsService.Subscribe` stream, send files directly to another device over
+WebRTC, and follow the system's light or dark preference.
 
 ## Stack
 
 - **Flutter** (stable, Dart 3) — Android, iOS, and Linux desktop
 - **Riverpod** for state management
-- **grpc** / **protobuf** for all API traffic (REST/SSE are not used)
+- **grpc** / **protobuf** for files, shares and events
 - **flutter_secure_storage** for the JWT
+- **flutter_webrtc** for peer-to-peer transfers — HTTP/SSE carries only the
+  signalling between peers, never the file
+- **shared_preferences** for the persisted theme setting
 - **file_picker** / **share_plus** / **path_provider** for native integrations
 
 ## Development
@@ -84,14 +88,14 @@ lib/
 ├── main.dart                 # ProviderScope + MaterialApp
 └── src/
     ├── config.dart           # API_BASE_URL + gRPC target resolution
-    ├── theme.dart            # SfsColors + dark theme
+    ├── theme.dart            # SfsPalette light/dark ThemeExtension
     ├── format.dart           # bytes/date/path helpers (tested)
-    ├── models.dart           # API DTOs (tested)
-    ├── state/                # Riverpod auth controller + providers
+    ├── models.dart           # API DTOs + P2P models (tested)
+    ├── state/                # Riverpod auth, theme and P2P controllers
     ├── services/             # gRPC connection (cert pinning), API client,
-    │                         # events stream, token store
+    │                         # events stream, token store, P2P signalling
     ├── grpc/                 # generated gRPC/protobuf stubs (do not edit)
-    └── screens/              # login, files, shares, account
+    └── screens/              # login, files, shares, direct (P2P), account
 test/                         # unit tests + gated live integration test
 assets/                       # launcher icon sources
 ```
