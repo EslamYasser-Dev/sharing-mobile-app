@@ -19,19 +19,19 @@ flutter pub get
 flutter run
 ```
 
-Out of the box the app talks to the two deployed services: REST on
-`https://simple-file-share.up.railway.app` and gRPC on
-`https://mobile-shares.up.railway.app`. Point both at a local server with a
-compile-time define:
+Out of the box the app talks to two deployed endpoints: the API at
+`https://simple-file-share-production.up.railway.app` and gRPC at
+`reseau.proxy.rlwy.net:54492`. They differ because Railway's HTTP edge accepts
+HTTP/2 from the client but demuxes it to HTTP/1.1 for the origin, so gRPC has to
+cross a raw TCP proxy instead. Point both at a local server with one define:
 
 ```bash
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000    # Android emulator
 flutter run --dart-define=API_BASE_URL=http://localhost:3000   # local server
 ```
 
-The gRPC target (host/port/TLS) derives from `API_BASE_URL`, so one define
-keeps REST and gRPC in sync. Behind a raw TCP proxy (e.g. Railway), override it
-outright:
+Supplying an `API_BASE_URL` moves gRPC along with it, so local runs stay on one
+machine. To send gRPC somewhere else entirely, override it outright:
 
 ```bash
 flutter run \
@@ -40,9 +40,11 @@ flutter run \
   --dart-define=GRPC_PORT=15140
 ```
 
-Secure targets fetch `GET /api/grpc/cert` over HTTPS and pin the certificate
-on the channel (falling back to the system trust store if the endpoint is
-absent).
+Secure targets fetch `GET /api/grpc/cert` over HTTPS and keep it as an extra
+certificate the channel will accept, **alongside** the system trust store. That
+is what lets the app dial the gRPC endpoint through a raw TCP proxy: the
+backend's certificate is self-signed for `localhost` and could never pass a
+hostname check, but it is the certificate we were told to trust.
 
 Sign in with a username and password (JWT). OAuth is only available in the
 web app.
@@ -61,12 +63,15 @@ web app.
 ## Configuration
 
 `lib/src/config.dart` reads `API_BASE_URL`, `GRPC_HOST`, and `GRPC_PORT` via
-`String.fromEnvironment`. With no define the two defaults apply
-independently — `API_BASE_URL` → `https://simple-file-share.up.railway.app`
-(REST) and the gRPC target → `mobile-shares.up.railway.app` on port `443` with
-TLS. Supplying `API_BASE_URL` moves the gRPC target to the same origin as well
-(keeps local runs on one machine), and `GRPC_HOST`/`GRPC_PORT` override it
-outright:
+`String.fromEnvironment`. With no define:
+
+| | default |
+| --- | --- |
+| `API_BASE_URL` | `https://simple-file-share-production.up.railway.app` |
+| gRPC target | `reseau.proxy.rlwy.net:54492`, TLS on |
+
+Supplying an `API_BASE_URL` moves gRPC with it; `GRPC_HOST`/`GRPC_PORT`
+override the gRPC side alone:
 
 ```bash
 flutter run --dart-define=API_BASE_URL=https://files.example.com

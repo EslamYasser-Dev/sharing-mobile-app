@@ -3,28 +3,28 @@ import 'package:simplefileshare/src/config.dart';
 
 void main() {
   group('backend default', () {
-    test('apiBaseUrl points at the deployed REST service', () {
-      expect(apiBaseUrl, 'https://simple-file-share.up.railway.app');
+    test('apiBaseUrl points at the deployed service', () {
+      expect(apiBaseUrl, 'https://simple-file-share-production.up.railway.app');
     });
 
-    test('grpc target points at the separate gRPC service over TLS', () {
-      expect(grpcTarget.host, 'mobile-shares.up.railway.app');
-      expect(grpcTarget.port, 443);
+    test('grpc target points at the separate TCP proxy over TLS', () {
+      expect(grpcTarget.host, 'reseau.proxy.rlwy.net');
+      expect(grpcTarget.port, 54492);
       expect(grpcTarget.secure, isTrue);
     });
   });
 
   group('resolveGrpcTarget', () {
-    test('no overrides uses the standalone gRPC host, not the REST origin', () {
+    test('no overrides uses the standalone gRPC host and port', () {
       final target = resolveGrpcTarget(
-        'https://simple-file-share.up.railway.app',
+        'https://simple-file-share-production.up.railway.app',
       );
-      expect(target.host, 'mobile-shares.up.railway.app');
-      expect(target.port, 443);
+      expect(target.host, 'reseau.proxy.rlwy.net');
+      expect(target.port, 54492);
       expect(target.secure, isTrue);
     });
 
-    test('an explicit REST origin takes the gRPC target with it', () {
+    test('an explicit API origin moves gRPC along with it', () {
       final target = resolveGrpcTarget(
         'http://localhost:3000',
         apiOverridden: true,
@@ -34,13 +34,13 @@ void main() {
       expect(target.secure, isFalse);
     });
 
-    test('an explicit gRPC host and port target a TCP proxy', () {
+    test('an explicit gRPC host wins over the default host', () {
       final target = resolveGrpcTarget(
-        'https://simple-file-share.up.railway.app',
-        host: 'shuttle.proxy.rlwy.net',
+        'https://simple-file-share-production.up.railway.app',
+        host: 'other.proxy.rlwy.net',
         port: 15140,
       );
-      expect(target.host, 'shuttle.proxy.rlwy.net');
+      expect(target.host, 'other.proxy.rlwy.net');
       expect(target.port, 15140);
       expect(target.secure, isTrue);
     });
