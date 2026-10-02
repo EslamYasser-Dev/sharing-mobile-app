@@ -72,7 +72,6 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: SfsColors.danger,
-              foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Revoke'),
@@ -153,7 +152,7 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: SfsColors.card,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(color: SfsColors.border),
             ),
             child: Column(
@@ -166,17 +165,16 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
                         item.name,
                         style: const TextStyle(
                           color: SfsColors.text,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           fontSize: 15,
+                          letterSpacing: -0.2,
                         ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       '/${item.path}',
-                      style: const TextStyle(
-                        color: SfsColors.muted,
-                        fontSize: 12,
-                      ),
+                      style: SfsTextStyles.path,
                     ),
                   ],
                 ),
@@ -196,18 +194,19 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
                     'Expires ${formatDate(item.expiresAt)}',
                     style: const TextStyle(color: SfsColors.warn, fontSize: 12),
                   ),
+                const SizedBox(height: 10),
+                Container(height: 1, color: SfsColors.rule),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     OutlinedButton.icon(
+                      // Landing Chip accent tone: accent ink on an accent/30
+                      // border, so the positive action reads apart from the
+                      // destructive one beside it.
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: SfsColors.text,
-                        side: const BorderSide(color: SfsColors.border),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
+                        foregroundColor: SfsColors.accent,
+                        side: const BorderSide(color: SfsColors.accentBorder),
                       ),
                       onPressed: () => SharePlus.instance.share(
                         ShareParams(text: ref.read(apiClientProvider).shareUrl(item.token)),
@@ -220,10 +219,6 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: SfsColors.danger,
                         side: const BorderSide(color: SfsColors.dangerBorder),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
                       ),
                       onPressed: () => unawaited(_revoke(item)),
                       icon: const Icon(Icons.link_off, size: 16),
@@ -248,15 +243,13 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text(
-                'Shared links',
-                style: TextStyle(
-                  color: SfsColors.text,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Text('SHARES', style: SfsTextStyles.eyebrow),
+            ),
+            const SizedBox(height: 6),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Text('Shared links', style: SfsTextStyles.title),
             ),
             Expanded(child: _buildBody()),
           ],

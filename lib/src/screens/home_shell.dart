@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme.dart';
 import 'account_screen.dart';
 import 'files_screen.dart';
 import 'shares_screen.dart';
@@ -24,20 +25,27 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _index, children: _screens),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.folder_outlined),
-            label: 'Files',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.link), label: 'Shares'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Account',
-          ),
-        ],
+      // Hairline rule above the bar, the way the landing separates its
+      // header from the page.
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: SfsColors.rule)),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _index,
+          onTap: (i) => setState(() => _index = i),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.folder_outlined),
+              label: 'Files',
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.link), label: 'Shares'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: 'Account',
+            ),
+          ],
+        ),
       ),
     );
   }

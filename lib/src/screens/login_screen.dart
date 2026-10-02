@@ -58,20 +58,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: SfsColors.card,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: SfsColors.border),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Landing logo mark: accent glyph in an accent-dim box
+                  // outlined with paper/25.
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: SfsColors.accentDim,
+                        border: Border.all(color: SfsColors.secondaryBorder),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        Icons.folder_outlined,
+                        color: SfsColors.accent,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                   RichText(
                     textAlign: TextAlign.center,
                     text: const TextSpan(
                       style: TextStyle(
                         color: SfsColors.text,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 21,
+                        height: 1.15,
+                        letterSpacing: -0.4,
+                        fontWeight: FontWeight.w700,
                       ),
                       children: [
                         TextSpan(text: 'File'),
@@ -88,7 +110,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     textAlign: TextAlign.center,
                     style: TextStyle(color: SfsColors.muted, fontSize: 14),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
+                  Container(height: 1, color: SfsColors.rule),
+                  const SizedBox(height: 20),
                   const _FieldLabel('Username'),
                   TextField(
                     controller: _username,
@@ -118,30 +142,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 20),
                   FilledButton(
                     onPressed: _busy ? null : _submit,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: SfsColors.accent,
-                      foregroundColor: SfsColors.onAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                     child: _busy
                         ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: SfsColors.onAccent,
-                            ),
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text(
-                            'Sign in',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                            ),
-                          ),
+                        : const Text('Sign in'),
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -171,14 +178,6 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text.toUpperCase(),
-      style: const TextStyle(
-        color: SfsColors.muted,
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 1.2,
-      ),
-    );
+    return Text(text.toUpperCase(), style: SfsTextStyles.label);
   }
 }

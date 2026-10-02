@@ -210,7 +210,6 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: SfsColors.danger,
-              foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Delete'),
@@ -289,10 +288,6 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
             ),
             const SizedBox(height: 16),
             FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: SfsColors.accent,
-                foregroundColor: SfsColors.onAccent,
-              ),
               onPressed: () {
                 setState(() {
                   _loading = true;
@@ -329,15 +324,16 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
               separatorBuilder: (_, _) => const Divider(
                 height: 1,
                 indent: 56,
-                color: SfsColors.border,
+                color: SfsColors.rule,
               ),
               itemBuilder: (context, index) {
                 final item = _items[index];
                 return ListTile(
                   dense: true,
-                  leading: Text(
-                    item.isDir ? '📁' : '📄',
-                    style: const TextStyle(fontSize: 20),
+                  leading: Icon(
+                    item.isDir ? Icons.folder_outlined : Icons.description_outlined,
+                    size: 20,
+                    color: item.isDir ? SfsColors.accent : SfsColors.muted,
                   ),
                   title: Text(
                     item.name,
@@ -390,7 +386,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
         backgroundColor: SfsColors.accent,
         foregroundColor: SfsColors.onAccent,
         onPressed: widget.onOpenShares,
-        child: const Text('🔗', style: TextStyle(fontSize: 20)),
+        child: const Icon(Icons.link, size: 22),
       ),
       body: SafeArea(
         child: Column(
@@ -408,36 +404,31 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                     child: Text(
                       _path.isEmpty ? '/' : '/$_path',
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: SfsColors.muted,
-                        fontSize: 13,
-                      ),
+                      style: SfsTextStyles.path,
                     ),
                   ),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: SfsColors.text,
-                      side: const BorderSide(color: SfsColors.border),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
+                  IconButton(
+                    tooltip: 'New folder',
+                    icon: const Icon(
+                      Icons.create_new_folder_outlined,
+                      size: 22,
                     ),
+                    color: SfsColors.text,
                     onPressed: _openNewFolder,
-                    child: const Text('+DIR'),
                   ),
-                  const SizedBox(width: 8),
-                  FilledButton(
+                  const SizedBox(width: 4),
+                  FilledButton.icon(
                     style: FilledButton.styleFrom(
-                      backgroundColor: SfsColors.accent,
-                      foregroundColor: SfsColors.onAccent,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
                         vertical: 8,
                       ),
                     ),
                     onPressed: _uploadPct != null ? null : _upload,
-                    child: Text(_uploadPct != null ? '$_uploadPct%' : 'Upload'),
+                    icon: const Icon(Icons.upload_outlined, size: 16),
+                    label: Text(
+                      _uploadPct != null ? '$_uploadPct%' : 'Upload',
+                    ),
                   ),
                 ],
               ),
@@ -449,10 +440,10 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(2),
                       child: LinearProgressIndicator(
                         value: (used / quota).clamp(0.0, 1.0),
-                        minHeight: 8,
+                        minHeight: 4,
                         backgroundColor: SfsColors.surfaceOverlay,
                         color: used >= quota
                             ? SfsColors.danger
@@ -554,10 +545,6 @@ class _ShareDialogState extends ConsumerState<_ShareDialog> {
                     child: const Text('Close'),
                   ),
                   FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: SfsColors.accent,
-                      foregroundColor: SfsColors.onAccent,
-                    ),
                     onPressed: () async {
                       final url = _url;
                       Navigator.pop(context);

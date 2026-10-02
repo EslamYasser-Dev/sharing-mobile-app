@@ -39,39 +39,25 @@ class AccountScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Text(
-              'Account',
-              style: TextStyle(
-                color: SfsColors.text,
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-              ),
+            const Text('ACCOUNT', style: SfsTextStyles.eyebrow),
+            const SizedBox(height: 6),
+            Text(user.username, style: SfsTextStyles.title),
+            const SizedBox(height: 4),
+            Text(
+              '$role$joined',
+              style: const TextStyle(color: SfsColors.muted, fontSize: 13),
             ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: SfsColors.card,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: SfsColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    user.username,
-                    style: const TextStyle(
-                      color: SfsColors.text,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$role$joined',
-                    style: const TextStyle(color: SfsColors.muted, fontSize: 13),
-                  ),
-                  const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
@@ -96,11 +82,13 @@ class AccountScreen extends ConsumerWidget {
                   ),
                   if (quota > 0) ...[
                     const SizedBox(height: 14),
+                    Container(height: 1, color: SfsColors.rule),
+                    const SizedBox(height: 12),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(2),
                       child: LinearProgressIndicator(
                         value: (used / quota).clamp(0.0, 1.0),
-                        minHeight: 8,
+                        minHeight: 4,
                         backgroundColor: SfsColors.surfaceOverlay,
                         color: used >= quota
                             ? SfsColors.danger
@@ -124,24 +112,14 @@ class AccountScreen extends ConsumerWidget {
               style: OutlinedButton.styleFrom(
                 foregroundColor: SfsColors.danger,
                 side: const BorderSide(color: SfsColors.dangerBorder),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
               ),
               onPressed: () =>
                   unawaited(ref.read(authControllerProvider.notifier).signOut()),
-              child: const Text(
-                'Sign out',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
+              child: const Text('Sign out'),
             ),
             const SizedBox(height: 24),
             const Center(
-              child: Text(
-                'FileShare',
-                style: TextStyle(color: SfsColors.muted, fontSize: 12),
-              ),
+              child: Text('FILESHARE', style: SfsTextStyles.label),
             ),
           ],
         ),
@@ -161,22 +139,14 @@ class _Stat extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label.toUpperCase(),
-          style: const TextStyle(
-            color: SfsColors.muted,
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1,
-          ),
-        ),
+        Text(label.toUpperCase(), style: SfsTextStyles.label),
         const SizedBox(height: 2),
         Text(
           value,
           style: const TextStyle(
             color: SfsColors.text,
             fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
