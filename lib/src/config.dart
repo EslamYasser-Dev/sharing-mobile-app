@@ -2,12 +2,16 @@ const String _envApiUrl = String.fromEnvironment('API_BASE_URL');
 const String _envGrpcHost = String.fromEnvironment('GRPC_HOST');
 const String _envGrpcPort = String.fromEnvironment('GRPC_PORT');
 
-/// Default backend for both the REST API and gRPC (derived below from this
-/// same URL, so the two can never disagree). Override at build time with
-/// `--dart-define=API_BASE_URL=...` to target another deployment, e.g.
-/// `http://10.0.2.2:3000` for the Android emulator or `http://localhost:3000`
-/// for a local server.
-const String _defaultApiUrl = 'https://mobile-shares.up.railway.app';
+/// Default deployments: REST and gRPC are two separate Railway services.
+/// Override at build time with `--dart-define=API_BASE_URL=...`, which moves
+/// both REST and the gRPC target (so `http://10.0.2.2:3000` or
+/// `http://localhost:3000` keeps a local backend in sync), or with
+/// `GRPC_HOST`/`GRPC_PORT` for a raw TCP proxy.
+const String _defaultApiUrl = 'https://simple-file-share.up.railway.app';
+const String _defaultGrpcHost = 'mobile-shares.up.railway.app';
+
+/// True when the caller supplied their own REST origin.
+bool get _hasExplicitApi => _envApiUrl.trim().isNotEmpty;
 
 String get apiBaseUrl {
   final raw = _envApiUrl.trim();
@@ -27,11 +31,7 @@ class GrpcTarget {
   final bool secure;
 }
 
-GrpcTarget grpcTargetFrom(
-  String baseUrl, {
-  String? host,
-  int? port,
-}) {
+GrpcTarget grpcTargetFrom(String baseUrl, {String? host, int? port}) {
   final uri = Uri.parse(baseUrl.replaceAll(RegExp(r'/+$'), ''));
   final secure = uri.scheme != 'http';
   return GrpcTarget(
@@ -41,8 +41,27 @@ GrpcTarget grpcTargetFrom(
   );
 }
 
-GrpcTarget get grpcTarget => grpcTargetFrom(
-      apiBaseUrl,
-      host: _envGrpcHost.trim(),
-      port: int.tryParse(_envGrpcPort.trim()),
-    );
+/// Resolves the gRPC target for [baseUrl].
+///
+/// With no overrides the app talks to the two separate default services, so
+/// the standalone gRPC host wins over the REST origin. As soon as the caller
+/// supplies a REST origin ([apiOverridden]) or an explicit [host], the
+/// target derives from those instead — keeping local runs on one machine.
+GrpcTarget resolveGrpcTarget(
+  String baseUrl, {
+  String? host,
+  int? port,
+  bool apiOverridden = false,
+}) {
+  final resolved = (host == null || host.isEmpty) && !apiOverridden
+      ? _defaultGrpcHost
+      : host;
+  return grpcTargetFrom(baseUrl, host: resolved, port: port);
+}
+
+GrpcTarget get grpcTarget => resolveGrpcTarget(
+  apiBaseUrl,
+  host: _envGrpcHost.trim(),
+  port: int.tryParse(_envGrpcPort.trim()),
+  apiOverridden: _hasExplicitApi,
+);

@@ -19,17 +19,19 @@ flutter pub get
 flutter run
 ```
 
-Out of the box the app talks to the deployed backend
-(`https://mobile-shares.up.railway.app`) over both REST and gRPC. Point it at
-a different server with a compile-time define:
+Out of the box the app talks to the two deployed services: REST on
+`https://simple-file-share.up.railway.app` and gRPC on
+`https://mobile-shares.up.railway.app`. Point both at a local server with a
+compile-time define:
 
 ```bash
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000    # Android emulator
 flutter run --dart-define=API_BASE_URL=http://localhost:3000   # local server
 ```
 
-The gRPC target (host/port/TLS) is derived from `API_BASE_URL`. Behind a raw
-TCP proxy (e.g. Railway), override it:
+The gRPC target (host/port/TLS) derives from `API_BASE_URL`, so one define
+keeps REST and gRPC in sync. Behind a raw TCP proxy (e.g. Railway), override it
+outright:
 
 ```bash
 flutter run \
@@ -59,9 +61,12 @@ web app.
 ## Configuration
 
 `lib/src/config.dart` reads `API_BASE_URL`, `GRPC_HOST`, and `GRPC_PORT` via
-`String.fromEnvironment`. With no define, `API_BASE_URL` defaults to
-`https://mobile-shares.up.railway.app`, and the gRPC target is derived from it
-(`host`, port `443`, TLS on) — so REST and gRPC always point at the same place:
+`String.fromEnvironment`. With no define the two defaults apply
+independently — `API_BASE_URL` → `https://simple-file-share.up.railway.app`
+(REST) and the gRPC target → `mobile-shares.up.railway.app` on port `443` with
+TLS. Supplying `API_BASE_URL` moves the gRPC target to the same origin as well
+(keeps local runs on one machine), and `GRPC_HOST`/`GRPC_PORT` override it
+outright:
 
 ```bash
 flutter run --dart-define=API_BASE_URL=https://files.example.com

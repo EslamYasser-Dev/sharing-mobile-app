@@ -31,7 +31,7 @@ Run `flutter analyze` and `flutter test` before declaring any task done. There i
 - **Screens** (`lib/src/screens/`): auth gate → login or home shell (IndexedStack with files/shares/account tabs).
 - **Models/format helpers** in `lib/src/models.dart` and `lib/src/format.dart`; keep them pure — they are unit-tested in `test/`.
 - **Generated stubs** live in `lib/src/grpc/` (from `backend/api/proto/`) — never hand-edit; regenerate with `protoc` + `protoc-gen-dart`.
-- Config is compile-time: `String.fromEnvironment('API_BASE_URL')`, defaulting to the deployed backend `https://mobile-shares.up.railway.app` (REST and gRPC both derive from it); the gRPC target comes from `grpcTargetFrom(apiBaseUrl)` with optional `GRPC_HOST`/`GRPC_PORT` dart-define overrides (TCP proxy deployments). `_defaultApiUrl` in `config.dart` is the only baked-in host — never scatter hostnames elsewhere; target another server with `--dart-define`.
+- Config is compile-time: `String.fromEnvironment('API_BASE_URL')`, defaulting to `https://simple-file-share.up.railway.app` (REST), with the gRPC target on the separate `mobile-shares.up.railway.app:443` service. An explicit `API_BASE_URL` moves the gRPC target with it (keeps local runs in sync); `GRPC_HOST`/`GRPC_PORT` override it outright (TCP proxy deployments). `_defaultApiUrl` and `_defaultGrpcHost` in `config.dart` are the only baked-in hosts — never scatter hostnames elsewhere; target another server with `--dart-define`.
 
 ## Rules
 
