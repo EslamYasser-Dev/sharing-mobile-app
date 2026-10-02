@@ -43,10 +43,11 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
   }
 
   void _showError(String title, String message) {
+    final pal = SfsPalette.of(context);
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title, style: const TextStyle(color: SfsColors.danger)),
+        title: Text(title, style: TextStyle(color: pal.danger)),
         content: Text(message),
         actions: [
           TextButton(
@@ -59,6 +60,7 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
   }
 
   Future<void> _revoke(ShareItem item) async {
+    final pal = SfsPalette.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -70,9 +72,7 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: SfsColors.danger,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: pal.danger),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Revoke'),
           ),
@@ -90,6 +90,7 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
   }
 
   Widget _buildBody() {
+    final pal = SfsPalette.of(context);
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -103,14 +104,14 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
               child: Text(
                 _error!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: SfsColors.danger),
+                style: TextStyle(color: pal.danger),
               ),
             ),
             const SizedBox(height: 16),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: SfsColors.accent,
-                foregroundColor: SfsColors.onAccent,
+                backgroundColor: pal.accent,
+                foregroundColor: pal.onAccent,
               ),
               onPressed: () {
                 setState(() => _loading = true);
@@ -123,23 +124,26 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
       );
     }
     if (_items.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('No shared links yet', style: TextStyle(color: SfsColors.muted, fontSize: 15)),
+            Text(
+              'No shared links yet',
+              style: TextStyle(color: pal.muted, fontSize: 15),
+            ),
             SizedBox(height: 6),
             Text(
               'Create one from a file’s menu.',
-              style: TextStyle(color: SfsColors.muted, fontSize: 12),
+              style: TextStyle(color: pal.muted, fontSize: 12),
             ),
           ],
         ),
       );
     }
     return RefreshIndicator(
-      color: SfsColors.accent,
-      backgroundColor: SfsColors.card,
+      color: pal.accent,
+      backgroundColor: pal.card,
       onRefresh: _load,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -151,9 +155,9 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: SfsColors.card,
+              color: pal.card,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: SfsColors.border),
+              border: Border.all(color: pal.border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,8 +167,8 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
                     Expanded(
                       child: Text(
                         item.name,
-                        style: const TextStyle(
-                          color: SfsColors.text,
+                        style: TextStyle(
+                          color: pal.text,
                           fontWeight: FontWeight.w600,
                           fontSize: 15,
                           letterSpacing: -0.2,
@@ -172,30 +176,27 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      '/${item.path}',
-                      style: SfsTextStyles.path,
-                    ),
+                    Text('/${item.path}', style: SfsTextStyles.path(pal)),
                   ],
                 ),
                 const SizedBox(height: 6),
                 if (item.createdAt.isNotEmpty)
                   Text(
                     'by ${item.owner} · created ${formatDate(item.createdAt)}',
-                    style: const TextStyle(color: SfsColors.muted, fontSize: 12),
+                    style: TextStyle(color: pal.muted, fontSize: 12),
                   )
                 else if (item.owner.isNotEmpty)
                   Text(
                     'by ${item.owner}',
-                    style: const TextStyle(color: SfsColors.muted, fontSize: 12),
+                    style: TextStyle(color: pal.muted, fontSize: 12),
                   ),
                 if (item.expiresAt.isNotEmpty)
                   Text(
                     'Expires ${formatDate(item.expiresAt)}',
-                    style: const TextStyle(color: SfsColors.warn, fontSize: 12),
+                    style: TextStyle(color: pal.warn, fontSize: 12),
                   ),
                 const SizedBox(height: 10),
-                Container(height: 1, color: SfsColors.rule),
+                Container(height: 1, color: pal.rule),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -205,11 +206,15 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
                       // border, so the positive action reads apart from the
                       // destructive one beside it.
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: SfsColors.accent,
-                        side: const BorderSide(color: SfsColors.accentBorder),
+                        foregroundColor: pal.accent,
+                        side: BorderSide(color: pal.accentBorder),
                       ),
                       onPressed: () => SharePlus.instance.share(
-                        ShareParams(text: ref.read(apiClientProvider).shareUrl(item.token)),
+                        ShareParams(
+                          text: ref
+                              .read(apiClientProvider)
+                              .shareUrl(item.token),
+                        ),
                       ),
                       icon: const Icon(Icons.share, size: 16),
                       label: const Text('Share'),
@@ -217,8 +222,8 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: SfsColors.danger,
-                        side: const BorderSide(color: SfsColors.dangerBorder),
+                        foregroundColor: pal.danger,
+                        side: BorderSide(color: pal.dangerBorder),
                       ),
                       onPressed: () => unawaited(_revoke(item)),
                       icon: const Icon(Icons.link_off, size: 16),
@@ -236,20 +241,21 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pal = SfsPalette.of(context);
     return Scaffold(
-      backgroundColor: SfsColors.background,
+      backgroundColor: pal.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Text('SHARES', style: SfsTextStyles.eyebrow),
+              child: Text('SHARES', style: SfsTextStyles.eyebrow(pal)),
             ),
             const SizedBox(height: 6),
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Text('Shared links', style: SfsTextStyles.title),
+              child: Text('Shared links', style: SfsTextStyles.title(pal)),
             ),
             Expanded(child: _buildBody()),
           ],

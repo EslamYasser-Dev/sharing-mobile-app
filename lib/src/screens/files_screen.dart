@@ -89,10 +89,11 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
   }
 
   void _showError(String title, String message) {
+    final pal = SfsPalette.of(context);
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title, style: const TextStyle(color: SfsColors.danger)),
+        title: Text(title, style: TextStyle(color: pal.danger)),
         content: Text(message),
         actions: [
           TextButton(
@@ -105,6 +106,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
   }
 
   Future<void> _openNewFolder() async {
+    final pal = SfsPalette.of(context);
     _newFolderName.clear();
     final name = await showDialog<String>(
       context: context,
@@ -122,9 +124,8 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: SfsColors.accent),
-            onPressed: () =>
-                Navigator.pop(context, _newFolderName.text.trim()),
+            style: FilledButton.styleFrom(backgroundColor: pal.accent),
+            onPressed: () => Navigator.pop(context, _newFolderName.text.trim()),
             child: const Text('Create'),
           ),
         ],
@@ -159,7 +160,9 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
       size = bytes.length;
     }
     setState(() => _uploadPct = 0);
-    final res = await ref.read(apiClientProvider).uploadFile(
+    final res = await ref
+        .read(apiClientProvider)
+        .uploadFile(
           fileName: pf.name,
           size: size,
           dirPath: _path,
@@ -190,13 +193,13 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
       _showError('Download failed', res.error ?? 'Unknown error');
       return;
     }
-    await SharePlus.instance.share(ShareParams(
-      files: [XFile(res.data!.file.path)],
-      title: res.data!.name,
-    ));
+    await SharePlus.instance.share(
+      ShareParams(files: [XFile(res.data!.file.path)], title: res.data!.name),
+    );
   }
 
   Future<void> _confirmDelete(FileItem item) async {
+    final pal = SfsPalette.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -208,9 +211,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: SfsColors.danger,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: pal.danger),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Delete'),
           ),
@@ -229,6 +230,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
   }
 
   void _openActions(FileItem item) {
+    final pal = SfsPalette.of(context);
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -253,7 +255,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
             child: const Text('Create link'),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: SfsColors.danger),
+            style: TextButton.styleFrom(foregroundColor: pal.danger),
             onPressed: () {
               Navigator.pop(context);
               unawaited(_confirmDelete(item));
@@ -270,6 +272,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
   }
 
   Widget _buildBody() {
+    final pal = SfsPalette.of(context);
     if (_loading && _items.isEmpty && _error == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -283,7 +286,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
               child: Text(
                 _error!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: SfsColors.danger),
+                style: TextStyle(color: pal.danger),
               ),
             ),
             const SizedBox(height: 16),
@@ -302,18 +305,18 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
       );
     }
     return RefreshIndicator(
-      color: SfsColors.accent,
-      backgroundColor: SfsColors.card,
+      color: pal.accent,
+      backgroundColor: pal.card,
       onRefresh: _refresh,
       child: _items.isEmpty
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              children: const [
+              children: [
                 SizedBox(height: 160),
                 Center(
                   child: Text(
                     'Empty folder',
-                    style: TextStyle(color: SfsColors.muted, fontSize: 15),
+                    style: TextStyle(color: pal.muted, fontSize: 15),
                   ),
                 ),
               ],
@@ -321,24 +324,23 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
           : ListView.separated(
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: _items.length,
-              separatorBuilder: (_, _) => const Divider(
-                height: 1,
-                indent: 56,
-                color: SfsColors.rule,
-              ),
+              separatorBuilder: (_, _) =>
+                  Divider(height: 1, indent: 56, color: pal.rule),
               itemBuilder: (context, index) {
                 final item = _items[index];
                 return ListTile(
                   dense: true,
                   leading: Icon(
-                    item.isDir ? Icons.folder_outlined : Icons.description_outlined,
+                    item.isDir
+                        ? Icons.folder_outlined
+                        : Icons.description_outlined,
                     size: 20,
-                    color: item.isDir ? SfsColors.accent : SfsColors.muted,
+                    color: item.isDir ? pal.accent : pal.muted,
                   ),
                   title: Text(
                     item.name,
-                    style: const TextStyle(
-                      color: SfsColors.text,
+                    style: TextStyle(
+                      color: pal.text,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -346,17 +348,14 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                       ? null
                       : Text(
                           formatBytes(item.size),
-                          style: const TextStyle(
-                            color: SfsColors.muted,
-                            fontSize: 12,
-                          ),
+                          style: TextStyle(color: pal.muted, fontSize: 12),
                         ),
                   trailing: item.isDir
-                      ? const Icon(Icons.chevron_right, color: SfsColors.muted)
+                      ? Icon(Icons.chevron_right, color: pal.muted)
                       : IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.more_vert,
-                            color: SfsColors.muted,
+                            color: pal.muted,
                             size: 20,
                           ),
                           onPressed: () => _openActions(item),
@@ -376,15 +375,16 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pal = SfsPalette.of(context);
     final user = ref.watch(authControllerProvider).user;
     final quota = user?.quotaBytes ?? 0;
     final used = user?.size ?? 0;
 
     return Scaffold(
-      backgroundColor: SfsColors.background,
+      backgroundColor: pal.background,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: SfsColors.accent,
-        foregroundColor: SfsColors.onAccent,
+        backgroundColor: pal.accent,
+        foregroundColor: pal.onAccent,
         onPressed: widget.onOpenShares,
         child: const Icon(Icons.link, size: 22),
       ),
@@ -397,14 +397,14 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_upward, size: 20),
-                    color: SfsColors.muted,
+                    color: pal.muted,
                     onPressed: _path.isEmpty ? null : _goUp,
                   ),
                   Expanded(
                     child: Text(
                       _path.isEmpty ? '/' : '/$_path',
                       overflow: TextOverflow.ellipsis,
-                      style: SfsTextStyles.path,
+                      style: SfsTextStyles.path(pal),
                     ),
                   ),
                   IconButton(
@@ -413,7 +413,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                       Icons.create_new_folder_outlined,
                       size: 22,
                     ),
-                    color: SfsColors.text,
+                    color: pal.text,
                     onPressed: _openNewFolder,
                   ),
                   const SizedBox(width: 4),
@@ -426,9 +426,7 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                     ),
                     onPressed: _uploadPct != null ? null : _upload,
                     icon: const Icon(Icons.upload_outlined, size: 16),
-                    label: Text(
-                      _uploadPct != null ? '$_uploadPct%' : 'Upload',
-                    ),
+                    label: Text(_uploadPct != null ? '$_uploadPct%' : 'Upload'),
                   ),
                 ],
               ),
@@ -444,19 +442,14 @@ class _FilesScreenState extends ConsumerState<FilesScreen> {
                       child: LinearProgressIndicator(
                         value: (used / quota).clamp(0.0, 1.0),
                         minHeight: 4,
-                        backgroundColor: SfsColors.surfaceOverlay,
-                        color: used >= quota
-                            ? SfsColors.danger
-                            : SfsColors.accent,
+                        backgroundColor: pal.surfaceOverlay,
+                        color: used >= quota ? pal.danger : pal.accent,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${formatBytes(used)} of ${formatBytes(quota)} used',
-                      style: const TextStyle(
-                        color: SfsColors.muted,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: pal.muted, fontSize: 12),
                     ),
                   ],
                 ),
@@ -508,6 +501,7 @@ class _ShareDialogState extends ConsumerState<_ShareDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final pal = SfsPalette.of(context);
     return AlertDialog(
       title: Text(
         'Share ${widget.item.name}',
@@ -521,41 +515,40 @@ class _ShareDialogState extends ConsumerState<_ShareDialog> {
               child: Center(child: CircularProgressIndicator()),
             )
           : _error != null
-              ? Text(_error!, style: const TextStyle(color: SfsColors.danger))
-              : SelectableText(
-                  _url!,
-                  style: const TextStyle(
-                    color: SfsColors.accent,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+          ? Text(_error!, style: TextStyle(color: pal.danger))
+          : SelectableText(
+              _url!,
+              style: TextStyle(
+                color: pal.accent,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
       actions: _busy
           ? null
           : _error != null
-              ? [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Close'),
-                  ),
-                ]
-              : [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Close'),
-                  ),
-                  FilledButton(
-                    onPressed: () async {
-                      final url = _url;
-                      Navigator.pop(context);
-                      if (url != null) {
-                        await SharePlus.instance
-                            .share(ShareParams(text: url));
-                      }
-                    },
-                    child: const Text('Share'),
-                  ),
-                ],
+          ? [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ]
+          : [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  final url = _url;
+                  Navigator.pop(context);
+                  if (url != null) {
+                    await SharePlus.instance.share(ShareParams(text: url));
+                  }
+                },
+                child: const Text('Share'),
+              ),
+            ],
     );
   }
 }

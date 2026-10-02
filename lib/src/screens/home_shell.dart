@@ -23,13 +23,14 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final pal = SfsPalette.of(context);
     return Scaffold(
       body: IndexedStack(index: _index, children: _screens),
       // Hairline rule above the bar, the way the landing separates its
       // header from the page.
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: SfsColors.rule)),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: pal.rule)),
         ),
         child: BottomNavigationBar(
           currentIndex: _index,

@@ -47,6 +47,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final pal = SfsPalette.of(context);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -57,9 +58,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               constraints: const BoxConstraints(maxWidth: 400),
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: SfsColors.card,
+                color: pal.card,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: SfsColors.border),
+                border: Border.all(color: pal.border),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -73,13 +74,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       height: 44,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: SfsColors.accentDim,
-                        border: Border.all(color: SfsColors.secondaryBorder),
+                        color: pal.accentDim,
+                        border: Border.all(color: pal.secondaryBorder),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.folder_outlined,
-                        color: SfsColors.accent,
+                        color: pal.accent,
                         size: 24,
                       ),
                     ),
@@ -87,9 +88,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 14),
                   RichText(
                     textAlign: TextAlign.center,
-                    text: const TextSpan(
+                    text: TextSpan(
                       style: TextStyle(
-                        color: SfsColors.text,
+                        color: pal.text,
                         fontSize: 21,
                         height: 1.15,
                         letterSpacing: -0.4,
@@ -99,19 +100,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         TextSpan(text: 'File'),
                         TextSpan(
                           text: 'Share',
-                          style: TextStyle(color: SfsColors.accent),
+                          style: TextStyle(color: pal.accent),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
+                  Text(
                     'Sign in to access your files',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: SfsColors.muted, fontSize: 14),
+                    style: TextStyle(color: pal.muted, fontSize: 14),
                   ),
                   const SizedBox(height: 20),
-                  Container(height: 1, color: SfsColors.rule),
+                  Container(height: 1, color: pal.rule),
                   const SizedBox(height: 20),
                   const _FieldLabel('Username'),
                   TextField(
@@ -133,10 +134,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 12),
                     Text(
                       _error!,
-                      style: const TextStyle(
-                        color: SfsColors.danger,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: pal.danger, fontSize: 13),
                     ),
                   ],
                   const SizedBox(height: 20),
@@ -151,12 +149,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         : const Text('Sign in'),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'OAuth sign-in is available on the web app. '
                     'Use a username and password here.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: SfsColors.muted,
+                      color: pal.muted,
                       fontSize: 12,
                       height: 1.5,
                     ),
@@ -178,6 +176,7 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text.toUpperCase(), style: SfsTextStyles.label);
+    final pal = SfsPalette.of(context);
+    return Text(text.toUpperCase(), style: SfsTextStyles.label(pal));
   }
 }
