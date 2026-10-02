@@ -31,7 +31,7 @@ Run `flutter analyze` and `flutter test` before declaring any task done. There i
 - **Screens** (`lib/src/screens/`): auth gate → login or home shell (IndexedStack with files/shares/account tabs).
 - **Models/format helpers** in `lib/src/models.dart` and `lib/src/format.dart`; keep them pure — they are unit-tested in `test/`.
 - **Generated stubs** live in `lib/src/grpc/` (from `backend/api/proto/`) — never hand-edit; regenerate with `protoc` + `protoc-gen-dart`.
-- Config is compile-time: `String.fromEnvironment('API_BASE_URL')` with platform-appropriate fallbacks (Android emulator `10.0.2.2`, otherwise `localhost`); the gRPC target comes from `grpcTargetFrom(apiBaseUrl)` with optional `GRPC_HOST`/`GRPC_PORT` dart-define overrides (TCP proxy deployments). Never hardcode hostnames.
+- Config is compile-time: `String.fromEnvironment('API_BASE_URL')`, defaulting to the deployed backend `https://mobile-shares.up.railway.app` (REST and gRPC both derive from it); the gRPC target comes from `grpcTargetFrom(apiBaseUrl)` with optional `GRPC_HOST`/`GRPC_PORT` dart-define overrides (TCP proxy deployments). `_defaultApiUrl` in `config.dart` is the only baked-in host — never scatter hostnames elsewhere; target another server with `--dart-define`.
 
 ## Rules
 

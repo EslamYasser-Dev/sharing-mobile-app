@@ -19,11 +19,13 @@ flutter pub get
 flutter run
 ```
 
-Point the app at your API with a compile-time define (defaults: Android
-emulator `http://10.0.2.2:3000`, otherwise `http://localhost:3000`):
+Out of the box the app talks to the deployed backend
+(`https://mobile-shares.up.railway.app`) over both REST and gRPC. Point it at
+a different server with a compile-time define:
 
 ```bash
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000    # Android emulator
+flutter run --dart-define=API_BASE_URL=http://localhost:3000   # local server
 ```
 
 The gRPC target (host/port/TLS) is derived from `API_BASE_URL`. Behind a raw
@@ -57,7 +59,9 @@ web app.
 ## Configuration
 
 `lib/src/config.dart` reads `API_BASE_URL`, `GRPC_HOST`, and `GRPC_PORT` via
-`String.fromEnvironment`:
+`String.fromEnvironment`. With no define, `API_BASE_URL` defaults to
+`https://mobile-shares.up.railway.app`, and the gRPC target is derived from it
+(`host`, port `443`, TLS on) — so REST and gRPC always point at the same place:
 
 ```bash
 flutter run --dart-define=API_BASE_URL=https://files.example.com

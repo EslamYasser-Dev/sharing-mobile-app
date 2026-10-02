@@ -2,6 +2,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:simplefileshare/src/config.dart';
 
 void main() {
+  group('backend default', () {
+    test('apiBaseUrl points at the deployed Railway backend', () {
+      expect(apiBaseUrl, 'https://mobile-shares.up.railway.app');
+    });
+
+    test('grpc target is derived from that same backend over TLS', () {
+      expect(grpcTarget.host, 'mobile-shares.up.railway.app');
+      expect(grpcTarget.port, 443);
+      expect(grpcTarget.secure, isTrue);
+    });
+  });
+
   group('grpcTargetFrom', () {
     test('https defaults to port 443 and TLS', () {
       final target = grpcTargetFrom('https://shares.up.railway.app');
