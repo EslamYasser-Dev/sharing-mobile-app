@@ -53,6 +53,7 @@ dependencies:
   image: ^4.2.0
   image_picker: ^1.1.0
   video_player: ^2.14.1
+  sqflite_common_ffi: ^2.4.3
 
 dev_dependencies:
   flutter_test:
@@ -66,8 +67,6 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
   mocktail: ^1.0.3
-  sqflite_common_ffi: ^2.3.0
-
 flutter_launcher_icons:
   android: true
   ios: true
