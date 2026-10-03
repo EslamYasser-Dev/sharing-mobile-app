@@ -72,9 +72,9 @@ class _ImageViewerScreenState extends ConsumerState<ImageViewerScreen> {
   Widget build(BuildContext context) {
     final pal = SfsPalette.of(context);
     return Scaffold(
-      backgroundColor: pal.background,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.black,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

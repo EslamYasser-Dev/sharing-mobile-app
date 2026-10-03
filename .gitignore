@@ -50,3 +50,4 @@ app.*.map.json
 # Local tooling — absolute machine paths, not project config.
 .vscode/
 devtools_options.yaml
+android/build/

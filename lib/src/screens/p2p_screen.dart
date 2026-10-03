@@ -93,7 +93,7 @@ class _P2PScreenState extends ConsumerState<P2PScreen> {
     final controller = ref.read(p2pControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: pal.background,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -202,9 +202,9 @@ class _P2PScreenState extends ConsumerState<P2PScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: pal.card,
+        color: SfsGlass.of(pal).tint,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: pal.border),
+        border: Border.all(color: SfsGlass.of(pal).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -265,7 +265,7 @@ class _ConnectionChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: pal.surfaceOverlay,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: pal.border),
+        border: Border.all(color: SfsGlass.of(pal).border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -563,7 +563,7 @@ class _SearchRow extends ConsumerWidget {
                       color: online
                           ? const Color(0xFF34C759)
                           : pal.muted.withValues(alpha: 0.5),
-                      border: Border.all(color: pal.card, width: 2),
+                      border: Border.all(color: SfsGlass.of(pal).tint, width: 2),
                     ),
                   ),
                 ),

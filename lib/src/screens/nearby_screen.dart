@@ -27,7 +27,7 @@ class _NearbyScreenState extends ConsumerState<NearbyScreen> {
     final auth = ref.watch(authControllerProvider);
 
     return Scaffold(
-      backgroundColor: pal.background,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -77,9 +77,9 @@ class _NearbyScreenState extends ConsumerState<NearbyScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: pal.card,
+          color: SfsGlass.of(pal).tint,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: pal.border),
+          border: Border.all(color: SfsGlass.of(pal).border),
         ),
         child: Row(
           children: [
@@ -113,9 +113,9 @@ class _NearbyScreenState extends ConsumerState<NearbyScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: pal.card,
+              color: SfsGlass.of(pal).tint,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: pal.border),
+              border: Border.all(color: SfsGlass.of(pal).border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -528,7 +528,7 @@ class _PeerTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: pal.card,
+        color: SfsGlass.of(pal).tint,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isBlocked ? pal.dangerBorder : (isTrusted ? pal.accentBorder : pal.border),

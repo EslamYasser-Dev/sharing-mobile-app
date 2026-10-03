@@ -112,7 +112,7 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
   Widget build(BuildContext context) {
     final pal = SfsPalette.of(context);
     return Scaffold(
-      backgroundColor: pal.background,
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

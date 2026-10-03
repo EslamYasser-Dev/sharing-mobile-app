@@ -25,7 +25,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final auth = ref.watch(authControllerProvider);
 
     return Scaffold(
-      backgroundColor: pal.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text('Settings', style: SfsTextStyles.title(pal)),
         leading: IconButton(
@@ -60,9 +60,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: pal.card,
+        color: SfsGlass.of(pal).tint,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: pal.border),
+        border: Border.all(color: SfsGlass.of(pal).border),
       ),
       child: Column(
         children: [
@@ -235,9 +235,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: pal.card,
+            color: SfsGlass.of(pal).tint,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: pal.border),
+            border: Border.all(color: SfsGlass.of(pal).border),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,9 +323,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: pal.card,
+            color: SfsGlass.of(pal).tint,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: pal.border),
+            border: Border.all(color: SfsGlass.of(pal).border),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -433,9 +433,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: pal.card,
+            color: SfsGlass.of(pal).tint,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: pal.border),
+            border: Border.all(color: SfsGlass.of(pal).border),
           ),
           child: Column(children: children),
         ),

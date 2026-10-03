@@ -67,6 +67,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final pal = SfsPalette.of(context);
     return Scaffold(
+      backgroundColor: SfsPalette.of(context).background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -76,9 +77,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               constraints: const BoxConstraints(maxWidth: 400),
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: pal.card,
+                color: SfsGlass.of(pal).tint,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: pal.border),
+                border: Border.all(color: SfsGlass.of(pal).border),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

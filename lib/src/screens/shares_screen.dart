@@ -155,9 +155,9 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: pal.card,
+              color: SfsGlass.of(pal).tint,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: pal.border),
+              border: Border.all(color: SfsGlass.of(pal).border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,7 +243,7 @@ class _SharesScreenState extends ConsumerState<SharesScreen> {
   Widget build(BuildContext context) {
     final pal = SfsPalette.of(context);
     return Scaffold(
-      backgroundColor: pal.background,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

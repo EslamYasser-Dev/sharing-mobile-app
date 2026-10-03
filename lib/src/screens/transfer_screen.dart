@@ -53,7 +53,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen>
         t.direction == TransferDirection.p2pSend || t.direction == TransferDirection.p2pReceive).toList();
 
     return Scaffold(
-      backgroundColor: pal.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text('Transfers', style: SfsTextStyles.title(pal)),
         bottom: TabBar(
@@ -151,7 +151,7 @@ class _TransferScreenState extends ConsumerState<TransferScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: pal.card,
+        color: SfsGlass.of(pal).tint,
         border: Border(top: BorderSide(color: pal.border)),
       ),
       child: Row(

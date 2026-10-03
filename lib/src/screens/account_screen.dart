@@ -19,7 +19,7 @@ class AccountScreen extends ConsumerWidget {
     final user = auth.user;
     if (user == null) {
       return Scaffold(
-        backgroundColor: pal.background,
+        backgroundColor: Colors.transparent,
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -37,7 +37,7 @@ class AccountScreen extends ConsumerWidget {
     final files = user.files ?? 0;
 
     return Scaffold(
-      backgroundColor: pal.background,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -54,9 +54,9 @@ class AccountScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: pal.card,
+                color: SfsGlass.of(pal).tint,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: pal.border),
+                border: Border.all(color: SfsGlass.of(pal).border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,9 +103,9 @@ class AccountScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: pal.card,
+                color: SfsGlass.of(pal).tint,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: pal.border),
+                border: Border.all(color: SfsGlass.of(pal).border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
