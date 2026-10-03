@@ -434,6 +434,12 @@ ThemeData buildAppTheme(Brightness brightness) {
 /// Palette values are untouched (they mirror `landing/app/globals.css`);
 /// these helpers only add depth: soft neon glows, gradient hero washes and
 /// rounder panels. All glow alphas stay low so light mode stays calm.
+///
+/// NOTE (neon-glass direction): the app now leads the design language and may
+/// diverge from the landing. [SfsGlass] carries the divergence: frosted
+/// surfaces, aurora washes, and stronger glows. The base palette still backs
+/// every token, so light/dark keep working and the landing can adopt the
+/// language later.
 abstract final class SfsRadii {
   static const double card = 16;
   static const double sheet = 20;
@@ -493,4 +499,99 @@ abstract final class SfsDecor {
           failed ? pal.danger : pal.accent,
         ),
       );
+
+  /// Frosted-glass card: translucent surface + hairline border + soft lift.
+  /// Layer over [AuroraBackground] (or any wash) with a [BackdropFilter]
+  /// handled by [GlassCard] — this is just the paint.
+  static BoxDecoration glass(SfsPalette pal, {double radius = SfsRadii.card}) {
+    final glass = SfsGlass.of(pal);
+    return BoxDecoration(
+      color: glass.tint,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: glass.border),
+      boxShadow: SfsShadows.card(pal),
+    );
+  }
+
+  /// Frosted-glass card with a neon accent edge for live/active content.
+  static BoxDecoration liveGlass(
+    SfsPalette pal, {
+    bool failed = false,
+    double radius = SfsRadii.card,
+  }) {
+    final glass = SfsGlass.of(pal);
+    return BoxDecoration(
+      color: glass.tint,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(
+        color: failed ? pal.dangerBorder : pal.accentBorder,
+      ),
+      boxShadow: SfsShadows.glow(pal, failed ? pal.danger : pal.accent),
+    );
+  }
+}
+
+/// Neon-glass tokens derived from the base palette.
+///
+/// Everything derives from [SfsPalette] (never hardcoded), so both
+/// brightnesses keep working: dark gets warm-tan aurora + deep tints, light
+/// gets blue aurora + white tints with stronger borders to avoid washout.
+class SfsGlass {
+  const SfsGlass({
+    required this.tint,
+    required this.border,
+    required this.scrim,
+    required this.blur,
+    required this.auroraA,
+    required this.auroraB,
+    required this.auroraC,
+    required this.glowAlpha,
+  });
+
+  /// Frosted surface tint painted under the blur.
+  final Color tint;
+
+  /// Hairline border for glass edges.
+  final Color border;
+
+  /// Bottom scrim behind scrolling content / nav.
+  final Color scrim;
+
+  /// Backdrop blur sigma for cards and sheets.
+  final double blur;
+
+  /// Aurora wash stops: accent, violet, cyan derivations.
+  final Color auroraA;
+  final Color auroraB;
+  final Color auroraC;
+
+  /// Alpha multiplier for neon glows (stronger in dark).
+  final double glowAlpha;
+
+  factory SfsGlass.of(SfsPalette pal) {
+    final isDark =
+        pal.background.computeLuminance() < pal.text.computeLuminance();
+    if (isDark) {
+      return SfsGlass(
+        tint: pal.card.withValues(alpha: 0.62),
+        border: const Color(0x33F2EFE9),
+        scrim: pal.background.withValues(alpha: 0.78),
+        blur: 18,
+        auroraA: pal.accent.withValues(alpha: 0.34),
+        auroraB: const Color(0xFF8B7CF6).withValues(alpha: 0.26),
+        auroraC: const Color(0xFF4FD8E8).withValues(alpha: 0.20),
+        glowAlpha: 1,
+      );
+    }
+    return SfsGlass(
+      tint: const Color(0xFFFFFFFF).withValues(alpha: 0.66),
+      border: const Color(0xFF14161B).withValues(alpha: 0.12),
+      scrim: pal.background.withValues(alpha: 0.82),
+      blur: 14,
+      auroraA: pal.accent.withValues(alpha: 0.20),
+      auroraB: const Color(0xFF7C6CF6).withValues(alpha: 0.14),
+      auroraC: const Color(0xFF2FB9D4).withValues(alpha: 0.12),
+      glowAlpha: 0.55,
+    );
+  }
 }

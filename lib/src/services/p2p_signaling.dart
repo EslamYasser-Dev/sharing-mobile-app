@@ -182,7 +182,9 @@ class P2PSignaling {
     request.write(
       jsonEncode(<String, dynamic>{
         'to': to,
-        'kind': kind.name,
+        // Wire names differ from Dart names for the call namespace
+        // (`callInvite` vs `call-invite`).
+        'kind': p2pSignalKindToWire(kind),
         'payload': ?payload,
       }),
     );

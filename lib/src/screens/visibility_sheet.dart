@@ -5,6 +5,7 @@ import '../models.dart';
 import '../state/auth_controller.dart';
 import '../state/timeline_controller.dart';
 import '../theme.dart';
+import '../widgets/motion.dart';
 
 /// Bottom sheet to re-scope one file (Private / Followers / Public + the
 /// streaming toggle). Used from the timeline and the file browser.
@@ -127,9 +128,7 @@ class _VisibilitySheetState extends ConsumerState<VisibilitySheet> {
     if (!mounted) return;
     if (ok) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Visibility updated')));
+      showGlassToast(context, 'Visibility updated');
     } else {
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(

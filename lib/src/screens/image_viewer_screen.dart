@@ -1,16 +1,16 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../format.dart';
-import '../services/media_staging.dart';
+import '../services/viewer_gate.dart';
 import '../state/auth_controller.dart';
 import '../theme.dart';
 
-/// Full-screen image viewer. Owners stream directly; anyone else is gated on
-/// a fetched [VisibilitySetting] (link/public + streaming allowed) before a
-/// single byte is downloaded. The server re-checks on every byte served.
+/// Full-screen image viewer. The image streams straight from the server
+/// (`Image.network` renders progressively as bytes arrive) — nothing is
+/// downloaded first. Owners stream directly; anyone else is gated on a
+/// fetched [VisibilitySetting] before the first request. The server
+/// re-checks the gate on every byte served.
 class ImageViewerScreen extends ConsumerStatefulWidget {
   const ImageViewerScreen({
     super.key,
@@ -30,10 +30,8 @@ class ImageViewerScreen extends ConsumerStatefulWidget {
 }
 
 class _ImageViewerScreenState extends ConsumerState<ImageViewerScreen> {
-  File? _file;
-  double? _progress;
-  int _received = 0;
-  String? _error;
+  String? _url;
+  Map<String, String>? _headers;
   bool _gateDenied = false;
 
   @override
@@ -45,37 +43,29 @@ class _ImageViewerScreenState extends ConsumerState<ImageViewerScreen> {
   bool get _isOwner =>
       ref.read(authControllerProvider).user?.username == widget.owner;
 
-  void _onProgress(int received) {
+  Future<void> _load() async {
+    final api = ref.read(apiClientProvider);
+    if (!_isOwner) {
+      final vis = await api.getVisibility(
+        owner: widget.owner,
+        path: widget.path,
+      );
+      if (!mounted) return;
+      if (!canPlayMedia(isOwner: false, setting: vis.data)) {
+        setState(() => _gateDenied = true);
+        return;
+      }
+    }
+    final headers = await api.authHeaders();
     if (!mounted) return;
     setState(() {
-      _received = received;
-      // Unknown sizes (feed share entries) stay indeterminate rather than
-      // reporting a bogus fraction.
-      _progress = widget.size > 0 ? (received / widget.size).clamp(0.0, 1.0) : null;
-    });
-  }
-
-  Future<void> _load() async {
-    try {
-      final file = await stageMediaForPlayback(
-        api: ref.read(apiClientProvider),
+      _headers = headers;
+      _url = api.viewUrl(
         owner: widget.owner,
         path: widget.path,
         isOwner: _isOwner,
-        onProgress: _onProgress,
       );
-      if (!mounted) return;
-      setState(() {
-        _file = file;
-        _progress = 1;
-      });
-    } on MediaGateDenied {
-      if (!mounted) return;
-      setState(() => _gateDenied = true);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _error = e is StateError ? e.message : e.toString());
-    }
+    });
   }
 
   @override
@@ -84,6 +74,7 @@ class _ImageViewerScreenState extends ConsumerState<ImageViewerScreen> {
     return Scaffold(
       backgroundColor: pal.background,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -108,36 +99,21 @@ class _ImageViewerScreenState extends ConsumerState<ImageViewerScreen> {
         'The owner has not enabled viewing for this image.',
       );
     }
-    if (_error != null) {
-      return _message(
-        pal,
-        Icons.broken_image_outlined,
-        'Could not load image',
-        _error!,
-        retry: true,
-      );
-    }
-    final file = _file;
-    if (file == null) {
+    final url = _url;
+    final headers = _headers;
+    if (url == null || headers == null) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
+            const SizedBox(
               width: 160,
               child: LinearProgressIndicator(
-                value: _progress,
-                semanticsLabel: 'Downloading ${widget.name}',
+                semanticsLabel: 'Checking access',
               ),
             ),
             const SizedBox(height: 12),
-            Text(
-              _progress == null && _received == 0
-                  ? 'Checking access…'
-                  : 'Downloading… ${formatBytes(_received)}'
-                      '${widget.size > 0 ? ' of ${formatBytes(widget.size)}' : ''}',
-              style: TextStyle(color: pal.muted),
-            ),
+            Text('Checking access…', style: TextStyle(color: pal.muted)),
           ],
         ),
       );
@@ -146,23 +122,58 @@ class _ImageViewerScreenState extends ConsumerState<ImageViewerScreen> {
       minScale: 1,
       maxScale: 4,
       child: Center(
-        // Cap the decoded width at 2x the screen: full-res photos (12+ MP)
-        // would otherwise spike memory by hundreds of MB, while 2x still
-        // looks sharp at max pinch zoom.
-        child: Image(
-          image: ResizeImage(
-            FileImage(file),
-            width: _maxDecodeWidth(context),
+        // Hero flight target for the file-row thumbnail (tag includes the
+        // path; feed opens the same viewer without a source hero, which
+        // simply skips the flight).
+        child: Hero(
+          tag: 'file-image:${widget.path}',
+          child: Image(
+            // Cap the decoded width at 2x the screen: full-res photos
+            // (12+ MP) would otherwise spike memory by hundreds of MB.
+            image: ResizeImage(
+              NetworkImage(url, headers: headers),
+              width: _maxDecodeWidth(context),
+            ),
+            fit: BoxFit.contain,
+            gaplessPlayback: true,
+            // Streams in as bytes arrive; the bar only shows while the
+            // headers/total are still unknown.
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              final expected = progress.expectedTotalBytes;
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 160,
+                      child: LinearProgressIndicator(
+                        value: expected == null || expected <= 0
+                            ? null
+                            : (progress.cumulativeBytesLoaded / expected)
+                                  .clamp(0.0, 1.0),
+                        semanticsLabel: 'Loading ${widget.name}',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      expected == null || expected <= 0
+                          ? 'Loading… ${formatBytes(progress.cumulativeBytesLoaded)}'
+                          : 'Loading… ${formatBytes(progress.cumulativeBytesLoaded)} of ${formatBytes(expected)}',
+                      style: TextStyle(color: pal.muted),
+                    ),
+                  ],
+                ),
+              );
+            },
+            errorBuilder: (_, _, _) => _message(
+              pal,
+              Icons.broken_image_outlined,
+              'Could not load image',
+              'The file could not be streamed.',
+            ),
+            semanticLabel: widget.name,
           ),
-          fit: BoxFit.contain,
-          gaplessPlayback: true,
-          errorBuilder: (_, _, _) => _message(
-            pal,
-            Icons.broken_image_outlined,
-            'Could not decode image',
-            'The file is not a valid image.',
-          ),
-          semanticLabel: widget.name,
         ),
       ),
     );
@@ -177,9 +188,8 @@ class _ImageViewerScreenState extends ConsumerState<ImageViewerScreen> {
     SfsPalette pal,
     IconData icon,
     String title,
-    String detail, {
-    bool retry = false,
-  }) {
+    String detail,
+  ) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -195,17 +205,6 @@ class _ImageViewerScreenState extends ConsumerState<ImageViewerScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(color: pal.muted),
             ),
-            if (retry) ...[
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () => setState(() {
-                  _error = null;
-                  _progress = null;
-                  _load();
-                }),
-                child: const Text('Retry'),
-              ),
-            ],
           ],
         ),
       ),

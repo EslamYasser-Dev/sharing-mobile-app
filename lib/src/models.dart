@@ -282,8 +282,18 @@ class P2PPeer {
       P2PPeer(id: json['id'] as String? ?? '', user: json['user'] as String?);
 }
 
-/// The relayed frame kinds — the backend's `P2PSignal*` constants.
-enum P2PSignalKind { offer, answer, candidate, bye }
+/// The relayed frame kinds — the backend's `P2PSignal*` constants, plus the
+/// call namespace (`P2PCall*`) which file-transfer sessions ignore.
+enum P2PSignalKind {
+  offer,
+  answer,
+  candidate,
+  bye,
+  callInvite,
+  callAccept,
+  callDecline,
+  callEnd,
+}
 
 /// Maps a wire value onto [P2PSignalKind]; unknown kinds yield null so a
 /// future backend addition is ignored rather than crashing the session.
@@ -297,10 +307,30 @@ P2PSignalKind? p2pSignalKindFrom(String raw) {
       return P2PSignalKind.candidate;
     case 'bye':
       return P2PSignalKind.bye;
+    case 'call-invite':
+      return P2PSignalKind.callInvite;
+    case 'call-accept':
+      return P2PSignalKind.callAccept;
+    case 'call-decline':
+      return P2PSignalKind.callDecline;
+    case 'call-end':
+      return P2PSignalKind.callEnd;
     default:
       return null;
   }
 }
+
+/// Wire value for an outgoing signal kind.
+String p2pSignalKindToWire(P2PSignalKind kind) => switch (kind) {
+      P2PSignalKind.offer => 'offer',
+      P2PSignalKind.answer => 'answer',
+      P2PSignalKind.candidate => 'candidate',
+      P2PSignalKind.bye => 'bye',
+      P2PSignalKind.callInvite => 'call-invite',
+      P2PSignalKind.callAccept => 'call-accept',
+      P2PSignalKind.callDecline => 'call-decline',
+      P2PSignalKind.callEnd => 'call-end',
+    };
 
 /// One SDP/ICE/bye frame relayed between two peers. [payload] is opaque to
 /// the app — an SDP description for offer/answer, an ICE candidate dict for

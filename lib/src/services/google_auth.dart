@@ -23,10 +23,32 @@ class GoogleAuthService {
   final TokenStore _tokenStore;
 
   static GoogleSignIn _createDefaultGoogleSignIn() {
+    final serverClientId = googleServerClientId.isEmpty
+        ? null
+        : googleServerClientId;
     return GoogleSignIn(
       scopes: ['email', 'profile', 'openid'],
       signInOption: SignInOption.standard,
+      serverClientId: serverClientId,
     );
+  }
+
+  /// Whether Google sign-in is configured (needs a server client ID for the
+  /// ID-token audience the backend verifies).
+  static bool get isConfigured => googleServerClientId.isNotEmpty;
+
+  /// The OIDC ID token for [account]. NOTE: this is NOT `authHeaders` (that
+  /// carries the OAuth access token); the JWT the backend verifies lives in
+  /// `authentication.idToken`.
+  Future<String?> _idToken(GoogleSignInAccount account) async {
+    try {
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
+      if (idToken == null || idToken.isEmpty) return null;
+      return idToken;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Sign in with Google and exchange ID token for app access token.
@@ -37,8 +59,7 @@ class GoogleAuthService {
         return GoogleAuthResult.cancelled();
       }
 
-      final authHeaders = await account.authHeaders;
-      final idToken = authHeaders['authorization']?.replaceFirst('Bearer ', '');
+      final idToken = await _idToken(account);
 
       if (idToken == null || idToken.isEmpty) {
         return GoogleAuthResult.error('Failed to obtain ID token from Google');
@@ -80,8 +101,7 @@ class GoogleAuthService {
       final account = await _googleSignIn.signInSilently();
       if (account == null) return null;
 
-      final authHeaders = await account.authHeaders;
-      final idToken = authHeaders['authorization']?.replaceFirst('Bearer ', '');
+      final idToken = await _idToken(account);
 
       if (idToken == null || idToken.isEmpty) return null;
 
@@ -116,8 +136,7 @@ class GoogleAuthService {
         return GoogleAuthResult.cancelled();
       }
 
-      final authHeaders = await account.authHeaders;
-      final idToken = authHeaders['authorization']?.replaceFirst('Bearer ', '');
+      final idToken = await _idToken(account);
 
       if (idToken == null || idToken.isEmpty) {
         return GoogleAuthResult.error('Failed to obtain ID token');
@@ -203,13 +222,14 @@ class GoogleAuthService {
   }
 
   /// Basic ID token validation (format, not cryptographic verification).
+  /// The server re-verifies signature, audience, issuer, and expiry.
   bool _validateIdToken(String idToken) {
     final parts = idToken.split('.');
     if (parts.length != 3) return false;
 
     try {
       final payload = jsonDecode(
-        utf8.decode(base64Url.normalize(parts[1]).codeUnits),
+        utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
       ) as Map<String, dynamic>;
 
       // Check expiration

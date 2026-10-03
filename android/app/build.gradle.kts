@@ -6,7 +6,10 @@ plugins {
 
 android {
     namespace = "dev.eslam.simplefileshare"
-    compileSdk = flutter.compileSdkVersion
+    // Pinned past the Flutter default: permission_handler requires
+    // compiling against Android API 37+. Local SDKs ship it as the
+    // `android-37.0` directory (symlinked to `android-37`).
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

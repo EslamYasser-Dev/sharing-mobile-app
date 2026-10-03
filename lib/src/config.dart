@@ -1,6 +1,9 @@
 const String _envApiUrl = String.fromEnvironment('API_BASE_URL');
 const String _envGrpcHost = String.fromEnvironment('GRPC_HOST');
 const String _envGrpcPort = String.fromEnvironment('GRPC_PORT');
+const String _envGoogleServerClientId = String.fromEnvironment(
+  'GOOGLE_SERVER_CLIENT_ID',
+);
 
 /// Default deployment. REST and gRPC are two separate Railway endpoints:
 /// gRPC cannot ride an HTTP domain (Railway's edge demuxes HTTP/2 down to
@@ -19,6 +22,28 @@ String get apiBaseUrl {
   final base = raw.isEmpty ? _defaultApiUrl : raw;
   return base.replaceAll(RegExp(r'/+$'), '');
 }
+
+/// Web OAuth client ID used as the Google ID-token audience (the `aud` the
+/// backend checks against `GOOGLE_CLIENT_ID`). Empty until the app is built
+/// with `--dart-define=GOOGLE_SERVER_CLIENT_ID=...` from a Google Cloud
+/// OAuth client; Google sign-in is hidden while unset.
+String get googleServerClientId => _envGoogleServerClientId.trim();
+
+const String _envStunUrl = String.fromEnvironment('STUN_URL');
+const String _envTurnUrl = String.fromEnvironment('TURN_URL');
+const String _envTurnUsername = String.fromEnvironment('TURN_USERNAME');
+const String _envTurnCredential = String.fromEnvironment('TURN_CREDENTIAL');
+
+/// Optional STUN server for direct calls (e.g. `stun:stun.l.google.com:19302`).
+/// Empty means host-only candidates: same-LAN calls connect directly, which
+/// is the lowest-latency path and needs no internet at all.
+String get stunUrl => _envStunUrl.trim();
+
+/// Optional TURN relay for calls across NATs when no direct path exists.
+/// Empty means no relay (LAN-only). Takes effect on the next call.
+String get turnUrl => _envTurnUrl.trim();
+String get turnUsername => _envTurnUsername.trim();
+String get turnCredential => _envTurnCredential.trim();
 
 class GrpcTarget {
   const GrpcTarget({

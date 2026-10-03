@@ -5,13 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:video_player/video_player.dart';
 
 import '../format.dart';
-import '../services/media_staging.dart';
+import '../services/viewer_gate.dart';
 import '../state/auth_controller.dart';
 import '../theme.dart';
 
-/// Download-then-play video screen. True streaming waits on backend
-/// `Range: 206` support; until then the file stages into temp storage with
-/// progress + cancel, then plays locally (and offline-capable).
+/// Streaming video screen. The player fetches byte ranges straight from the
+/// server (which answers 206), so playback starts immediately and seeking
+/// never downloads the whole file. Owners stream directly; anyone else is
+/// gated on a fetched [VisibilitySetting] before the first request.
 class VideoScreen extends ConsumerStatefulWidget {
   const VideoScreen({
     super.key,
@@ -32,8 +33,6 @@ class VideoScreen extends ConsumerStatefulWidget {
 
 class _VideoScreenState extends ConsumerState<VideoScreen> {
   VideoPlayerController? _controller;
-  double? _progress;
-  int _received = 0;
   String? _error;
   bool _gateDenied = false;
   bool _cancelled = false;
@@ -57,47 +56,50 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
       ref.read(authControllerProvider).user?.username == widget.owner;
 
   Future<void> _load() async {
-    try {
-      final file = await stageMediaForPlayback(
-        api: ref.read(apiClientProvider),
+    final api = ref.read(apiClientProvider);
+    if (!_isOwner) {
+      final vis = await api.getVisibility(
         owner: widget.owner,
         path: widget.path,
-        isOwner: _isOwner,
-        onProgress: (received) {
-          if (!mounted || _cancelled) return;
-          setState(() {
-            _received = received;
-            _progress = widget.size > 0
-                ? (received / widget.size).clamp(0.0, 1.0)
-                : null;
-          });
-        },
       );
       if (!mounted || _cancelled) return;
-      final controller = VideoPlayerController.file(file);
-      await controller.initialize();
-      if (!mounted || _cancelled) {
-        await controller.dispose();
+      if (!canPlayMedia(isOwner: false, setting: vis.data)) {
+        setState(() => _gateDenied = true);
         return;
       }
-      setState(() {
-        _controller = controller;
-        _progress = 1;
-      });
-      _positionTimer = Timer.periodic(
-        const Duration(milliseconds: 500),
-        (_) {
-          if (mounted) setState(() {});
-        },
-      );
-      await controller.play();
-    } on MediaGateDenied {
-      if (!mounted) return;
-      setState(() => _gateDenied = true);
+    }
+    final headers = await api.authHeaders();
+    if (!mounted || _cancelled) return;
+    final controller = VideoPlayerController.networkUrl(
+      Uri.parse(
+        api.viewUrl(
+          owner: widget.owner,
+          path: widget.path,
+          isOwner: _isOwner,
+        ),
+      ),
+      httpHeaders: headers,
+    );
+    try {
+      await controller.initialize();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = e is StateError ? e.message : e.toString());
+      setState(() => _error = e.toString());
+      await controller.dispose();
+      return;
     }
+    if (!mounted || _cancelled) {
+      await controller.dispose();
+      return;
+    }
+    setState(() => _controller = controller);
+    _positionTimer = Timer.periodic(
+      const Duration(milliseconds: 500),
+      (_) {
+        if (mounted) setState(() {});
+      },
+    );
+    await controller.play();
   }
 
   String _stamp(Duration d) {
@@ -147,25 +149,20 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
     }
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) {
+      // No download phase anymore: the spinner only covers the gate check
+      // and the player's first-byte handshake.
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
+            const SizedBox(
               width: 160,
               child: LinearProgressIndicator(
-                value: _progress,
-                semanticsLabel: 'Downloading ${widget.name}',
+                semanticsLabel: 'Loading video',
               ),
             ),
             const SizedBox(height: 12),
-            Text(
-              _progress == null && _received == 0
-                  ? 'Checking access…'
-                  : 'Downloading… ${formatBytes(_received)}'
-                      '${widget.size > 0 ? ' of ${formatBytes(widget.size)}' : ''}',
-              style: TextStyle(color: pal.muted),
-            ),
+            Text('Loading…', style: TextStyle(color: pal.muted)),
             const SizedBox(height: 8),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -280,8 +277,7 @@ class _VideoScreenState extends ConsumerState<VideoScreen> {
                   _error = null;
                   _controller?.dispose();
                   _controller = null;
-                  _progress = null;
-                  _received = 0;
+                  _cancelled = false;
                   _load();
                 }),
                 child: const Text('Retry'),

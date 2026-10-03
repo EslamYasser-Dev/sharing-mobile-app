@@ -77,67 +77,87 @@ class TimelineController extends Notifier<TimelineState> {
   Future<void> loadInitial() async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, error: null);
-    final result = await ref
-        .read(apiClientProvider)
-        .listFeed(limit: _pageSize);
-    final page = result.data;
-    if (page == null) {
+    // Belt and braces: any unexpected throw still lands in the error state
+    // with a retry button — the spinner can never stick forever.
+    try {
+      final result = await ref
+          .read(apiClientProvider)
+          .listFeed(limit: _pageSize);
+      final page = result.data;
+      if (page == null) {
+        state = state.copyWith(
+          isLoading: false,
+          error: result.error ?? 'Failed to load timeline',
+        );
+        return;
+      }
+      state = state.copyWith(
+        events: page.events,
+        cursor: page.nextCursor,
+        hasMore: page.hasMore,
+        isLoading: false,
+      );
+    } catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: result.error ?? 'Failed to load timeline',
+        error: 'Failed to load timeline',
       );
-      return;
     }
-    state = state.copyWith(
-      events: page.events,
-      cursor: page.nextCursor,
-      hasMore: page.hasMore,
-      isLoading: false,
-    );
   }
 
   Future<void> refresh() async {
-    final result = await ref
-        .read(apiClientProvider)
-        .listFeed(limit: _pageSize);
-    final page = result.data;
-    if (page == null) {
-      state = state.copyWith(error: result.error ?? 'Failed to refresh');
-      return;
+    try {
+      final result = await ref
+          .read(apiClientProvider)
+          .listFeed(limit: _pageSize);
+      final page = result.data;
+      if (page == null) {
+        state = state.copyWith(error: result.error ?? 'Failed to refresh');
+        return;
+      }
+      state = state.copyWith(
+        events: page.events,
+        cursor: page.nextCursor,
+        hasMore: page.hasMore,
+        error: null,
+      );
+    } catch (_) {
+      state = state.copyWith(error: 'Failed to refresh');
     }
-    state = state.copyWith(
-      events: page.events,
-      cursor: page.nextCursor,
-      hasMore: page.hasMore,
-      error: null,
-    );
   }
 
   Future<void> loadMore() async {
     if (!state.hasMore || state.isLoadingMore || state.isLoading) return;
     state = state.copyWith(isLoadingMore: true, error: null);
-    final result = await ref
-        .read(apiClientProvider)
-        .listFeed(cursor: state.cursor, limit: _pageSize);
-    final page = result.data;
-    if (page == null) {
+    try {
+      final result = await ref
+          .read(apiClientProvider)
+          .listFeed(cursor: state.cursor, limit: _pageSize);
+      final page = result.data;
+      if (page == null) {
+        state = state.copyWith(
+          isLoadingMore: false,
+          error: result.error ?? 'Failed to load more',
+        );
+        return;
+      }
+      final seen = state.events.map((e) => e.id).toSet();
+      state = state.copyWith(
+        events: [
+          ...state.events,
+          for (final e in page.events)
+            if (!seen.contains(e.id)) e,
+        ],
+        cursor: page.nextCursor,
+        hasMore: page.hasMore,
+        isLoadingMore: false,
+      );
+    } catch (_) {
       state = state.copyWith(
         isLoadingMore: false,
-        error: result.error ?? 'Failed to load more',
+        error: 'Failed to load more',
       );
-      return;
     }
-    final seen = state.events.map((e) => e.id).toSet();
-    state = state.copyWith(
-      events: [
-        ...state.events,
-        for (final e in page.events)
-          if (!seen.contains(e.id)) e,
-      ],
-      cursor: page.nextCursor,
-      hasMore: page.hasMore,
-      isLoadingMore: false,
-    );
   }
 
   /// Re-scopes one file, then patches matching feed entries with the new

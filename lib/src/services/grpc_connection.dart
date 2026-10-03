@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert' show utf8;
 import 'dart:io' show HttpClient;
 
@@ -19,7 +20,21 @@ class GrpcConnection {
   Future<ClientChannel> get _channel {
     final provided = _providedChannel;
     if (provided != null) return Future<ClientChannel>.value(provided);
-    return _pendingChannel ??= _openChannel();
+    final pending = _pendingChannel;
+    if (pending != null) return pending;
+    final future = _openChannel();
+    _pendingChannel = future;
+    // A failed open must not poison every later call: drop it so the next
+    // attempt redials instead of replaying the same error forever.
+    unawaited(
+      future.then(
+        (_) {},
+        onError: (_) {
+          if (identical(_pendingChannel, future)) _pendingChannel = null;
+        },
+      ),
+    );
+    return future;
   }
 
   Future<ClientChannel> _openChannel() async {

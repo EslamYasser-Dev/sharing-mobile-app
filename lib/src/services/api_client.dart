@@ -6,12 +6,14 @@ import 'dart:typed_data';
 import 'package:fixnum/fixnum.dart';
 import 'package:grpc/grpc.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 
 import '../config.dart';
 import '../format.dart';
 import '../grpc/fileshare/v1/fileshare.pbgrpc.dart';
 import '../models.dart';
+import '../services/viewer_gate.dart';
 import 'grpc_connection.dart';
 import 'token_store.dart';
 
@@ -235,6 +237,98 @@ class ApiClient {
       );
 
   String shareUrl(String token) => buildUrl('/api/share/$token');
+
+  /// Streaming URL for inline preview: own files via `/api/files/view`,
+  /// others' via the gate-checked `/api/shared`. Pair with [authHeaders]:
+  /// image and video players fetch byte ranges directly, so preview never
+  /// downloads the whole file first.
+  String viewUrl({String? owner, required String path, required bool isOwner}) =>
+      isOwner
+          ? buildUrl('/api/files/view', {'path': path})
+          : buildUrl('/api/shared', {'owner': owner ?? '', 'path': path});
+
+  /// Bearer headers for raw HTTP players (`Image.network`, video players)
+  /// that cannot go through the gRPC channel.
+  Future<Map<String, String>> authHeaders() async {
+    final token = await _tokens.get();
+    if (token == null || token.isEmpty) return const {};
+    return {'Authorization': 'Bearer $token'};
+  }
+
+  /// Fetches a small JPEG preview for an image, disk-cached by path and
+  /// modification time. Returns null for anything unthumbable (video,
+  /// documents, errors) — callers fall back to glyphs, never to errors.
+  ///
+  /// When the server predates `/api/thumbs`, small images fall back to a
+  /// one-time full download that is downscaled locally and cached, so pics
+  /// still appear as images on any backend version.
+  Future<File?> fetchThumbnail({
+    required String path,
+    required String modified,
+    int? size,
+    int width = 256,
+  }) async {
+    try {
+      final dir = await getTemporaryDirectory();
+      final key = _thumbKey(path, modified);
+      final cached = File('${dir.path}/thumbs/$key.jpg');
+      if (await cached.exists()) return cached;
+
+      final token = await _tokens.get();
+      if (token == null || token.isEmpty) return null;
+      final headers = {'Authorization': 'Bearer $token'};
+
+      final thumbUri = Uri.parse(
+        buildUrl('/api/thumbs', {'path': path, 'w': '$width'}),
+      );
+      final thumbResp = await http
+          .get(thumbUri, headers: headers)
+          .timeout(const Duration(seconds: 30));
+      if (thumbResp.statusCode == 200 && thumbResp.bodyBytes.isNotEmpty) {
+        await cached.parent.create(recursive: true);
+        await cached.writeAsBytes(thumbResp.bodyBytes, flush: true);
+        return cached;
+      }
+      // Fallback for servers without the thumbs endpoint: downscale locally.
+      // Bounded to small images so a photo folder does not pull gigabytes.
+      if (size != null &&
+          size > 0 &&
+          size <= _thumbFallbackMaxBytes &&
+          viewerKindFor(path) == ViewerKind.image) {
+        final viewUri = Uri.parse(buildUrl('/api/files/view', {'path': path}));
+        final full = await http
+            .get(viewUri, headers: headers)
+            .timeout(const Duration(seconds: 60));
+        if (full.statusCode == 200 && full.bodyBytes.isNotEmpty) {
+          final decoded = img.decodeImage(full.bodyBytes);
+          if (decoded != null && decoded.width > 0) {
+            final small = img.copyResize(decoded, width: width);
+            final jpg = img.encodeJpg(small, quality: 70);
+            await cached.parent.create(recursive: true);
+            await cached.writeAsBytes(jpg, flush: true);
+            return cached;
+          }
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Full-download ceiling for the client-side thumbnail fallback.
+  static const int _thumbFallbackMaxBytes = 8 << 20;
+
+  String _thumbKey(String path, String modified) {
+    final bytes = utf8.encode('$path|$modified');
+    var h1 = 0x811c9dc5;
+    var h2 = 0x01000193;
+    for (final b in bytes) {
+      h1 = (h1 ^ b) * 0x01000193 & 0xffffffff;
+      h2 = (h2 ^ b) * 0x811c9dc5 & 0xffffffff;
+    }
+    return '${h1.toRadixString(16)}${h2.toRadixString(16)}';
+  }
 
   Future<ApiResult<void>> uploadFile({
     required String fileName,

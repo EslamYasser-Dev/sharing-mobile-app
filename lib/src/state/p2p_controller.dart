@@ -76,6 +76,27 @@ class P2PController extends Notifier<P2PState> {
   int _generation = 0;
   int _seq = 0;
 
+  /// Broadcast of every relayed signal frame. Call handling subscribes here
+  /// so voice/video shares the single SSE stream (and peer id) with file
+  /// transfer instead of opening a second identity.
+  final StreamController<P2PSignalFrame> signalBus =
+      StreamController<P2PSignalFrame>.broadcast();
+
+  /// Relays one frame as this peer. Throws when the stream is down.
+  Future<void> relaySignal({
+    required String to,
+    required P2PSignalKind kind,
+    Object? payload,
+  }) {
+    final self = state.peerId;
+    if (self == null || !_running) {
+      throw const P2PSignalingException('not connected');
+    }
+    return ref
+        .read(p2pSignalingProvider)
+        .sendSignal(from: self, to: to, kind: kind, payload: payload);
+  }
+
   @override
   P2PState build() {
     ref.onDispose(_stop);
@@ -200,6 +221,9 @@ class P2PController extends Notifier<P2PState> {
     final signal = frame.signal;
     if (frame.type == 'signal' && signal != null) {
       unawaited(session.handleSignal(signal).catchError((_) {}));
+      // File sessions ignore call namespaced frames (and vice versa), so
+      // fanning every frame out to the bus is safe for both.
+      if (!signalBus.isClosed) signalBus.add(signal);
     }
   }
 

@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../format.dart';
 import '../models.dart';
+import '../services/haptics.dart';
 import '../services/viewer_gate.dart';
 import '../state/auth_controller.dart';
 import '../state/follow_controller.dart';
 import '../state/timeline_controller.dart';
 import '../theme.dart';
+import '../widgets/motion.dart';
 import 'image_viewer_screen.dart';
 import 'video_screen.dart';
 import 'visibility_sheet.dart';
@@ -24,29 +26,20 @@ class TimelineScreen extends ConsumerStatefulWidget {
 }
 
 class _TimelineScreenState extends ConsumerState<TimelineScreen> {
-  final _scroll = ScrollController();
-
   @override
   void initState() {
     super.initState();
-    _scroll.addListener(_onScroll);
     Future.microtask(() {
       ref.read(timelineControllerProvider.notifier).loadInitial();
       ref.read(followControllerProvider.notifier).refreshFollowing();
     });
   }
 
-  @override
-  void dispose() {
-    _scroll.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scroll.position.pixels >=
-        _scroll.position.maxScrollExtent - 400) {
+  bool _onScroll(ScrollNotification n) {
+    if (n.metrics.pixels >= n.metrics.maxScrollExtent - 400) {
       ref.read(timelineControllerProvider.notifier).loadMore();
     }
+    return false;
   }
 
   @override
@@ -57,8 +50,12 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
     final items = state.filtered(me);
 
     return Scaffold(
-      backgroundColor: pal.background,
-      appBar: AppBar(title: const Text('Timeline')),
+      // Transparent over the shell aurora; cards paint glass.
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('TailTime'),
+      ),
       body: Column(
         children: [
           _FilterChips(state: state, pal: pal),
@@ -67,7 +64,10 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
               onRefresh: () => ref
                   .read(timelineControllerProvider.notifier)
                   .refresh(),
-              child: _list(context, state, items, me, pal),
+              child: NotificationListener<ScrollNotification>(
+                onNotification: _onScroll,
+                child: _list(context, state, items, me, pal),
+              ),
             ),
           ),
         ],
@@ -89,7 +89,7 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
       return _empty(
         pal,
         Icons.cloud_off_outlined,
-        'Could not load timeline',
+        'Could not load TailTime',
         state.error!,
         retry: true,
       );
@@ -100,26 +100,32 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
         Icons.dynamic_feed_outlined,
         state.filter == TimelineFilter.mine
             ? 'Nothing here yet'
-            : 'Your timeline is quiet',
+            : 'Your TailTime is quiet',
         state.filter == TimelineFilter.mine
             ? 'Upload a file and it will show up here.'
             : 'Follow people to see their shared uploads, or check back later.',
       );
     }
-    return ListView.separated(
-      controller: _scroll,
-      padding: const EdgeInsets.all(12),
-      itemCount: items.length + (state.hasMore ? 1 : 0),
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
-      itemBuilder: (context, i) {
-        if (i >= items.length) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-        return _FeedCard(event: items[i], me: me);
-      },
+    // Crossfade when the feed contents swap (refresh / filter change):
+    // keyed by filter + head event so appends don't replay it.
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 260),
+      switchInCurve: Curves.easeOutCubic,
+      child: ListView.separated(
+        key: ValueKey('${state.filter.name}:${items.isEmpty ? '' : items.first.id}:${items.length}'),
+        padding: const EdgeInsets.fromLTRB(12, 4, 12, 100),
+        itemCount: items.length + (state.hasMore ? 1 : 0),
+        separatorBuilder: (_, _) => const SizedBox(height: 8),
+        itemBuilder: (context, i) {
+          if (i >= items.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          return _FeedCard(event: items[i], me: me);
+        },
+      ),
     );
   }
 
@@ -162,30 +168,83 @@ class _TimelineScreenState extends ConsumerState<TimelineScreen> {
   }
 }
 
+/// Segmented glass filter: All / Mine / Following with a sliding thumb.
+/// Paint-only glass (no blur) so it stays cheap inside the scroll view.
 class _FilterChips extends ConsumerWidget {
   const _FilterChips({required this.state, required this.pal});
 
   final TimelineState state;
   final SfsPalette pal;
 
+  static const _options = [
+    (TimelineFilter.all, 'All'),
+    (TimelineFilter.mine, 'Mine'),
+    (TimelineFilter.following, 'Following'),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(timelineControllerProvider.notifier);
-    Widget chip(TimelineFilter filter, String label) => ChoiceChip(
-      label: Text(label),
-      selected: state.filter == filter,
-      onSelected: (_) => notifier.setFilter(filter),
-    );
+    final selected = _options.indexWhere((o) => o.$1 == state.filter);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      child: Row(
-        children: [
-          chip(TimelineFilter.all, 'All'),
-          const SizedBox(width: 8),
-          chip(TimelineFilter.mine, 'Mine'),
-          const SizedBox(width: 8),
-          chip(TimelineFilter.following, 'Following'),
-        ],
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: SfsDecor.glass(pal, radius: SfsRadii.pill),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final w = constraints.maxWidth / _options.length;
+            return Stack(
+              children: [
+                AnimatedAlign(
+                  alignment: Alignment(
+                    -1 + (selected * 2 / (_options.length - 1)),
+                    0,
+                  ),
+                  duration: const Duration(milliseconds: 280),
+                  curve: Curves.easeOutBack,
+                  child: Container(
+                    width: w,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: pal.accent,
+                      borderRadius: BorderRadius.circular(SfsRadii.pill),
+                      boxShadow: SfsShadows.glow(pal, pal.accent),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    for (var i = 0; i < _options.length; i++)
+                      SizedBox(
+                        width: w,
+                        height: 34,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            sfsTap();
+                            notifier.setFilter(_options[i].$1);
+                          },
+                          child: Center(
+                            child: Text(
+                              _options[i].$2,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: i == selected
+                                    ? pal.onAccent
+                                    : pal.muted,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -203,48 +262,97 @@ class _FeedCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pal = SfsPalette.of(context);
-    return Card(
-      child: ListTile(
-        leading: _leading(pal),
-        title: Text(event.name, overflow: TextOverflow.ellipsis),
-        subtitle: Text(
-          '${event.owner} · ${formatBytes(event.size)} · ${formatDate(event.createdAt)}',
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _VisibilityChip(visibility: event.visibility),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
-              onSelected: (v) => _onMenu(context, ref, v),
-              itemBuilder: (_) => _menuItems(ref),
+    // Paint-only glass: a scrolling list of real blurs would sink the GPU.
+    // Own posts get the neon accent edge.
+    return Container(
+      decoration: _mine
+          ? SfsDecor.liveGlass(pal, radius: 14)
+          : SfsDecor.glass(pal, radius: 14),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: _kind == ViewerKind.none
+              ? null
+              : () {
+                  sfsTap();
+                  _open(context);
+                },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                _leading(pal),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        event.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: pal.text,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        '${event.owner} · ${formatBytes(event.size)} · ${formatDate(event.createdAt)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: pal.muted,
+                          fontSize: 11,
+                          fontFamilyFallback: const ['monospace'],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _VisibilityDot(visibility: event.visibility),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert, color: pal.muted, size: 20),
+                  onSelected: (v) => _onMenu(context, ref, v),
+                  itemBuilder: (_) => _menuItems(ref),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-        onTap: _kind == ViewerKind.none
-            ? null
-            : () => _open(context),
       ),
     );
   }
 
   Widget _leading(SfsPalette pal) {
-    switch (event.kind) {
-      case 'share':
-        return Icon(Icons.link, color: pal.accent);
-      case 'visibility':
-        return Icon(Icons.visibility_outlined, color: pal.muted);
-      default:
-        switch (_kind) {
-          case ViewerKind.image:
-            return Icon(Icons.image_outlined, color: pal.accent);
-          case ViewerKind.video:
-            return Icon(Icons.play_circle_outlined, color: pal.accent);
-          case ViewerKind.none:
-            return Icon(Icons.insert_drive_file_outlined, color: pal.muted);
-        }
-    }
+    final (icon, tint) = switch (event.kind) {
+      'share' => (Icons.link_rounded, pal.accent),
+      'visibility' => (Icons.visibility_outlined, pal.muted),
+      _ => switch (_kind) {
+        ViewerKind.image => (Icons.image_outlined, pal.accent),
+        ViewerKind.video => (
+          Icons.play_circle_outlined,
+          const Color(0xFF8B7CF6),
+        ),
+        ViewerKind.none => (
+          Icons.insert_drive_file_outlined,
+          pal.muted,
+        ),
+      },
+    };
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: tint.withValues(alpha: 0.30)),
+      ),
+      child: Icon(icon, size: 19, color: tint),
+    );
   }
 
   List<PopupMenuEntry<String>> _menuItems(WidgetRef ref) {
@@ -279,7 +387,7 @@ class _FeedCard extends ConsumerWidget {
       case 'open':
         _open(context);
       case 'visibility':
-        await showModalBottomSheet<void>(
+        await showSpringSheet<void>(
           context: context,
           builder: (_) => VisibilitySheet(
             owner: event.owner,
@@ -296,7 +404,10 @@ class _FeedCard extends ConsumerWidget {
             : await ref
                 .read(followControllerProvider.notifier)
                 .unfollow(event.owner);
-        if (!ok && context.mounted) {
+        if (ok) {
+          sfsConfirm();
+        } else if (context.mounted) {
+          sfsError();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -331,25 +442,53 @@ class _FeedCard extends ConsumerWidget {
   }
 }
 
-class _VisibilityChip extends StatelessWidget {
-  const _VisibilityChip({required this.visibility});
+/// Visibility as a glowing status dot + mono label. Color is status, not
+/// decoration: private reads calm, followers warm, public bright.
+class _VisibilityDot extends StatelessWidget {
+  const _VisibilityDot({required this.visibility});
 
   final String visibility;
 
   @override
   Widget build(BuildContext context) {
     final pal = SfsPalette.of(context);
-    final (label, icon) = switch (visibility) {
-      'public' => ('Public', Icons.public_outlined),
-      'link' => ('Followers', Icons.group_outlined),
-      _ => ('Private', Icons.lock_outlined),
+    final (label, color) = switch (visibility) {
+      'public' => ('PUBLIC', pal.accent),
+      'link' => ('FOLLOWERS', const Color(0xFF8B7CF6)),
+      _ => ('PRIVATE', pal.muted),
     };
     return Semantics(
       label: 'Visibility: $label',
-      child: Chip(
-        avatar: Icon(icon, size: 14, color: pal.muted),
-        label: Text(label, style: TextStyle(fontSize: 11, color: pal.muted)),
-        visualDensity: VisualDensity.compact,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 7,
+            height: 7,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.8),
+                  blurRadius: 6,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              letterSpacing: 1.1,
+              fontWeight: FontWeight.w600,
+              color: pal.muted,
+              fontFamilyFallback: const ['monospace'],
+            ),
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
     );
   }

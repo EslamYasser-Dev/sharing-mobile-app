@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/google_auth.dart';
 import '../state/auth_controller.dart';
 import '../theme.dart';
 
@@ -16,12 +17,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _password = TextEditingController();
   String? _error;
   bool _busy = false;
+  bool _googleBusy = false;
 
   @override
   void dispose() {
     _username.dispose();
     _password.dispose();
     super.dispose();
+  }
+
+  Future<void> _signInWithGoogle() async {
+    if (_googleBusy || _busy) return;
+    setState(() {
+      _googleBusy = true;
+      _error = null;
+    });
+    final err = await ref
+        .read(authControllerProvider.notifier)
+        .signInWithGoogle();
+    if (!mounted) return;
+    setState(() {
+      _googleBusy = false;
+      _error = err;
+    });
   }
 
   Future<void> _submit() async {
@@ -149,16 +167,60 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         : const Text('Sign in'),
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'OAuth sign-in is available on the web app. '
-                    'Use a username and password here.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: pal.muted,
-                      fontSize: 12,
-                      height: 1.5,
+                  if (GoogleAuthService.isConfigured) ...[
+                    Row(
+                      children: [
+                        Expanded(child: Container(height: 1, color: pal.rule)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(
+                              color: pal.muted,
+                              fontSize: 11,
+                              fontFamilyFallback: const ['monospace'],
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Container(height: 1, color: pal.rule)),
+                      ],
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: (_busy || _googleBusy)
+                          ? null
+                          : _signInWithGoogle,
+                      icon: _googleBusy
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.g_mobiledata, size: 22),
+                      label: const Text('Continue with Google'),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'First time? A FileShare account is created for you.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: pal.muted,
+                        fontSize: 12,
+                        height: 1.5,
+                      ),
+                    ),
+                  ] else ...[
+                    Text(
+                      'OAuth sign-in is available on the web app. '
+                      'Use a username and password here.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: pal.muted,
+                        fontSize: 12,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

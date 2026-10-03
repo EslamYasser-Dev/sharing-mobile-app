@@ -127,8 +127,11 @@ class P2PSession {
     return pc;
   }
 
-  RTCSessionDescription? _asSessionDescription(Object? payload) {
-    if (payload is! Map) return null;
+  /// Call-scoped payloads (`{'scope': 'call', ...}`) belong to CallSession.
+  static bool _isCallScoped(Object? payload) =>
+      payload is Map && payload['scope'] == 'call';
+
+  RTCSessionDescription? _asSessionDescription(Object? payload) {    if (payload is! Map) return null;
     final sdp = payload['sdp'];
     final type = payload['type'];
     if (sdp is! String || type is! String) return null;
@@ -169,6 +172,10 @@ class P2PSession {
       await _cleanup(remoteId);
       return;
     }
+
+    // Call-scoped media SDP belongs to CallSession; ignoring it here keeps
+    // voice/video negotiation off the file-transfer connections.
+    if (_isCallScoped(signal.payload)) return;
 
     final pc = await _peerConnection(remoteId);
 

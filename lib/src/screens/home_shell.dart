@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,6 +7,7 @@ import '../format.dart';
 import '../models/transfer.dart';
 import '../state/transfer_controller.dart';
 import '../theme.dart';
+import '../widgets/aurora_background.dart';
 import 'account_screen.dart';
 import 'files_screen.dart';
 import 'p2p_screen.dart';
@@ -35,8 +38,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       ),
     );
 
-    return Scaffold(
-      body: Stack(
+    return AuroraBackground(
+      child: Scaffold(
+        // Transparent: the aurora wash is the canvas. Converted screens
+        // (Files, Timeline) paint glass over it; the rest keep their
+        // opaque panels until their own glass pass.
+        backgroundColor: Colors.transparent,
+        body: Stack(
         children: [
           IndexedStack(
             index: _index,
@@ -62,14 +70,22 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           ),
         ],
       ),
-      // Hairline rule above the bar, the way the landing separates its
-      // header from the page.
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: pal.rule)),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _index,
+      // Frosted-glass nav: one thin blur strip, static content behind it.
+      bottomNavigationBar: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: SfsGlass.of(pal).blur,
+            sigmaY: SfsGlass.of(pal).blur,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: SfsGlass.of(pal).tint,
+              border: Border(top: BorderSide(color: SfsGlass.of(pal).border)),
+            ),
+            child: BottomNavigationBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              currentIndex: _index,
           onTap: (i) => setState(() => _index = i),
           items: [
             const BottomNavigationBarItem(
@@ -114,19 +130,21 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             ),
             const BottomNavigationBarItem(
               icon: Icon(Icons.dynamic_feed_outlined),
-              label: 'Timeline',
+              label: 'TailTime',
             ),
             const BottomNavigationBarItem(
               icon: Icon(Icons.devices_other),
               label: 'Direct',
-            ),            const BottomNavigationBarItem(
+            ),
+            const BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               label: 'Account',
             ),
           ],
         ),
+        ),
       ),
-    );
+    )));
   }
 }
 
@@ -206,27 +224,23 @@ class _TransferPillState extends ConsumerState<_TransferPill> {
           '${transfer.direction.name} ${transfer.status.name} transfer ${transfer.name}',
       child: GestureDetector(
         onTap: widget.onOpen,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: pal.card,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: transfer.status == TransferStatus.failed
-                  ? pal.dangerBorder
-                  : pal.accentBorder,
+        // One small blur: the pill floats over scrolling content.
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: SfsGlass.of(pal).blur,
+              sigmaY: SfsGlass.of(pal).blur,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: (transfer.status == TransferStatus.failed
-                        ? pal.danger
-                        : pal.accent)
-                    .withValues(alpha: 0.22),
-                blurRadius: 18,
-                offset: const Offset(0, 6),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 10,
               ),
-            ],
-          ),
+              decoration: SfsDecor.liveGlass(
+                pal,
+                failed: transfer.status == TransferStatus.failed,
+              ),
           child: Row(
             children: [
               _PulsingDot(
@@ -279,6 +293,8 @@ class _TransferPillState extends ConsumerState<_TransferPill> {
                   onPressed: () => controller.cancelTransfer(transfer.id),
                 ),
             ],
+          ),
+            ),
           ),
         ),
       ),
