@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/services.dart' show MissingPluginException;
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../config.dart';
@@ -90,6 +91,8 @@ class GoogleAuthService {
         user: meResult.data!,
         isNewAccount: exchangeResult.isNewAccount ?? false,
       );
+    } on MissingPluginException {
+      return GoogleAuthResult.error('Google sign-in is not available on this platform');
     } on Exception catch (e) {
       return GoogleAuthResult.error('Google Sign-In failed: $e');
     }
@@ -184,7 +187,11 @@ class GoogleAuthService {
 
   /// Sign out from Google and clear local tokens.
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
+    try {
+      await _googleSignIn.signOut();
+    } on MissingPluginException {
+      // google_sign_in has no Linux/desktop implementation — nothing to sign out of.
+    }
     await _tokenStore.clear();
   }
 
