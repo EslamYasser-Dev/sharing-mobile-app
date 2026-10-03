@@ -172,7 +172,7 @@ class HttpUploadService {
     required Transfer transfer,
     required File file,
     void Function(int bytesSent, int totalBytes)? onProgress,
-    Future<void> Function()? awaitResume,
+    Future<bool> Function()? awaitResume,
     bool Function()? shouldCancel,
   }) async {
     final fingerprint = '${transfer.destinationPath}|${transfer.name}|${transfer.size}|${await file.lastModified()}';
@@ -202,11 +202,13 @@ class HttpUploadService {
       }
 
       if (awaitResume != null) {
-        await awaitResume();
+        final canResume = await awaitResume();
         if (shouldCancel?.call() ?? false) throw UploadCancelledException();
 
-        session = await getSession(session.id);
-        offset = session.offset;
+        if (canResume) {
+          session = await getSession(session.id);
+          offset = session.offset;
+        }
       }
 
       final end = offset + chunkSize > transfer.size ? transfer.size : offset + chunkSize;

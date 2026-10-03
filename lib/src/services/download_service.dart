@@ -74,7 +74,7 @@ class HttpDownloadService {
     required String remotePath,
     required String localPath,
     void Function(int bytesReceived, int totalBytes)? onProgress,
-    Future<void> Function()? awaitResume,
+    Future<bool> Function()? awaitResume,
     bool Function()? shouldCancel,
   }) async {
     final info = await getFileInfo(remotePath);

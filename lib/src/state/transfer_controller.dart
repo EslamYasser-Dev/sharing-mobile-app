@@ -18,7 +18,7 @@ class TransferHooks {
   TransferHooks({this.onProgress, this.awaitResume, this.shouldCancel});
 
   void Function(int transferred, int total)? onProgress;
-  Future<void> Function()? awaitResume;
+  Future<bool> Function()? awaitResume;
   bool Function()? shouldCancel;
 }
 
@@ -253,6 +253,11 @@ class TransferController extends Notifier<List<Transfer>> {
       retryCount: t.status == TransferStatus.failed ? t.retryCount + 1 : t.retryCount,
       clearError: true,
     );
+    // A still-running worker (blocked in _awaitResume's gate when it was
+    // paused) resumes in place; _awaitResume now owns returning it to
+    // `transferring`. A finished/failed worker has no gate in flight, so
+    // re-queue it for a fresh attempt.
+    if (_workers.containsKey(id)) return;
     await _setStatus(id, TransferStatus.queued);
     _pump();
   }
@@ -480,13 +485,17 @@ class TransferController extends Notifier<List<Transfer>> {
     }
   }
 
-  Future<void> _awaitResume(String id) async {
+  Future<bool> _awaitResume(String id) async {
     final t = _byId(id);
-    if (t == null || t.status != TransferStatus.paused) return;
+    if (t == null || t.status != TransferStatus.paused) return false;
     final gate =
         _resumeGates.putIfAbsent(id, () => Completer<void>());
     await gate.future;
     if (_cancelFlags[id] == true) throw _Cancelled();
+    // Break the `resuming` interlude so the UI tracks that the live worker
+    // is moving bytes again.
+    await _setStatus(id, TransferStatus.transferring);
+    return true;
   }
 
   Future<void> _defaultExecute(Transfer transfer, TransferHooks hooks) async {
@@ -631,8 +640,6 @@ class TransferController extends Notifier<List<Transfer>> {
   }
 
   bool _isRetryable(Object error) {
-    if (error is SocketException || error is TimeoutException) return true;
-    if (error is HttpException) return true;
     if (error is _Cancelled || error is _Paused) return false;
     final msg = error.toString();
     if (msg.contains('401') ||
@@ -642,6 +649,8 @@ class TransferController extends Notifier<List<Transfer>> {
         msg.contains('Quota')) {
       return false;
     }
+    if (error is SocketException || error is TimeoutException) return true;
+    if (error is HttpException) return true;
     return true;
   }
 

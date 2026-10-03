@@ -160,7 +160,18 @@ class CallController extends Notifier<CallState> {
     _timeout = Timer(_inviteTimeout, () {
       if (state.status == CallStatus.inviting ||
           state.status == CallStatus.connecting) {
+        final peerId = state.peerId;
+        final callId = state.callId;
         unawaited(hangup(silent: true));
+        if (peerId != null && callId != null) {
+          unawaited(
+            _relay(
+              peerId,
+              P2PSignalKind.callEnd,
+              {'callId': callId},
+            ).catchError((_) {}),
+          );
+        }
         state = state.copyWith(
           status: CallStatus.ended,
           error: 'No answer',
@@ -255,7 +266,17 @@ class CallController extends Notifier<CallState> {
     final session = _session;
     _session = null;
     if (!silent) {
-      await session?.hangup().catchError((_) {});
+      // Signal the end explicitly when the media session hasn't started
+      // (invite timeout, disconnect), then let the session finish teardown.
+      if (session != null && session.callId != null && session.peerId != null) {
+        await session.hangup().catchError((_) {});
+      } else if (state.peerId != null && state.callId != null) {
+        await _relay(
+          state.peerId!,
+          P2PSignalKind.callEnd,
+          {'callId': state.callId!},
+        ).catchError((_) {});
+      }
     } else {
       await session?.close(notify: false).catchError((_) {});
     }
