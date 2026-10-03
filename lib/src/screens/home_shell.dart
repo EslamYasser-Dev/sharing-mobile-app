@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../format.dart';
 import '../models/transfer.dart';
+import '../state/call_controller.dart';
 import '../state/transfer_controller.dart';
 import '../theme.dart';
 import '../widgets/aurora_background.dart';
 import 'account_screen.dart';
+import 'call_screen.dart';
 import 'files_screen.dart';
 import 'p2p_screen.dart';
 import 'shares_screen.dart';
@@ -68,6 +70,10 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               onOpen: () => _openTab(2),
             ),
           ),
+          // Calls overlay everything (including the nav): ringing shows the
+          // incoming screen, an owned call shows the in-call screen keyed by
+          // call id so renderers mount fresh per call.
+          const _CallOverlay(),
         ],
       ),
       // Frosted-glass nav: one thin blur strip, static content behind it.
@@ -145,6 +151,27 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         ),
       ),
     )));
+  }
+}
+
+/// Call overlay: incoming screen while ringing, in-call screen for owned
+/// calls. Hidden when idle or ended.
+class _CallOverlay extends ConsumerWidget {
+  const _CallOverlay();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final call = ref.watch(callControllerProvider);
+    return switch (call.status) {
+      CallStatus.ringing => const Positioned.fill(
+        child: IncomingCallScreen(),
+      ),
+      CallStatus.inviting || CallStatus.connecting || CallStatus.active =>
+        Positioned.fill(
+          child: CallScreen(key: ValueKey(call.callId ?? 'call')),
+        ),
+      CallStatus.idle || CallStatus.ended => const SizedBox.shrink(),
+    };
   }
 }
 

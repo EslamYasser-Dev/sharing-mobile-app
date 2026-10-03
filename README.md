@@ -3,7 +3,20 @@
 Flutter app for the Simple File Share server: browse and upload files, manage
 share links, watch usage, react to live server events over the gRPC
 `EventsService.Subscribe` stream, send files directly to another device over
-WebRTC, and follow the system's light or dark preference.
+WebRTC, make voice/video calls, follow the system's light or dark preference,
+and scroll a social upload timeline (TailTime) with per-file privacy.
+
+## Features
+
+- **Files** — browse, resumable uploads/downloads with pause/resume, thumbnails
+  for images, streaming image/video preview (byte-range, never full-download)
+- **TailTime** — upload timeline with All/Mine/Following filters, follow/unfollow,
+  per-file visibility (Private / Followers / Public + streaming toggle)
+- **Shares** — links with optional password, expiry, and download budget
+- **Direct** — WebRTC file transfer, nearby discovery with a master on/off
+  switch, username search with presence, and voice/video calls (direct LAN
+  media, optional TURN relay, transport route badge)
+- **Auth** — username/password JWT plus Google sign-in (OIDC ID-token exchange)
 
 ## Stack
 
@@ -11,9 +24,13 @@ WebRTC, and follow the system's light or dark preference.
 - **Riverpod** for state management
 - **grpc** / **protobuf** for files, shares and events
 - **flutter_secure_storage** for the JWT
-- **flutter_webrtc** for peer-to-peer transfers — HTTP/SSE carries only the
-  signalling between peers, never the file
-- **shared_preferences** for the persisted theme setting
+- **flutter_webrtc** for peer-to-peer transfers and calls — HTTP/SSE carries only the
+  signalling between peers, never the file or call media
+- **video_player** for streaming video preview/playback
+- **google_sign_in** for Google sign-in (OIDC ID token → app JWT exchange)
+- **permission_handler** for mic/camera runtime permission (calls)
+- **image** for client-side thumbnail fallback
+- **shared_preferences** for the persisted theme, nearby-switch, and UI settings
 - **file_picker** / **share_plus** / **path_provider** for native integrations
 
 ## Development
@@ -50,8 +67,10 @@ is what lets the app dial the gRPC endpoint through a raw TCP proxy: the
 backend's certificate is self-signed for `localhost` and could never pass a
 hostname check, but it is the certificate we were told to trust.
 
-Sign in with a username and password (JWT). OAuth is only available in the
-web app.
+Sign in with a username and password (JWT) or with Google
+(`Continue with Google` appears once the app is built with
+`--dart-define=GOOGLE_SERVER_CLIENT_ID=<web OAuth client id>` and the server
+sets the matching `GOOGLE_CLIENT_ID`).
 
 ## Scripts
 
@@ -66,19 +85,31 @@ web app.
 
 ## Configuration
 
-`lib/src/config.dart` reads `API_BASE_URL`, `GRPC_HOST`, and `GRPC_PORT` via
-`String.fromEnvironment`. With no define:
+`lib/src/config.dart` reads its settings via `String.fromEnvironment`. With
+no defines:
 
 | | default |
 | --- | --- |
 | `API_BASE_URL` | `https://simple-file-share-production.up.railway.app` |
 | gRPC target | `reseau.proxy.rlwy.net:54492`, TLS on |
+| `GOOGLE_SERVER_CLIENT_ID` | `""` (Google button hidden) |
+| `STUN_URL` / `TURN_URL` (+ `TURN_USERNAME`/`TURN_CREDENTIAL`) | `""` (LAN-only calls) |
 
 Supplying an `API_BASE_URL` moves gRPC with it; `GRPC_HOST`/`GRPC_PORT`
 override the gRPC side alone:
 
 ```bash
 flutter run --dart-define=API_BASE_URL=https://files.example.com
+```
+
+Calls need no relay on the same LAN (host-only ICE). Across NATs, point the
+app at a TURN server:
+
+```bash
+flutter run \
+  --dart-define=TURN_URL=turn:turn.example.com:3478 \
+  --dart-define=TURN_USERNAME=user \
+  --dart-define=TURN_CREDENTIAL=secret
 ```
 
 ## Project layout
@@ -91,11 +122,15 @@ lib/
     ├── theme.dart            # SfsPalette light/dark ThemeExtension
     ├── format.dart           # bytes/date/path helpers (tested)
     ├── models.dart           # API DTOs + P2P models (tested)
-    ├── state/                # Riverpod auth, theme and P2P controllers
+    ├── state/                # Riverpod auth, theme, transfers, P2P, calls,
+    │                         # timeline, follow, nearby-switch controllers
     ├── services/             # gRPC connection (cert pinning), API client,
-    │                         # events stream, token store, P2P signalling
+    │                         # events stream, token store, P2P signalling,
+    │                         # call session, thumbnails, viewer gate
+    ├── widgets/              # aurora background, motion kit, glass chrome
     ├── grpc/                 # generated gRPC/protobuf stubs (do not edit)
-    └── screens/              # login, files, shares, direct (P2P), account
+    └── screens/              # login, files, shares, transfers, timeline,
+                              # direct (P2P + calls), account, viewers
 test/                         # unit tests + gated live integration test
 assets/                       # launcher icon sources
 ```

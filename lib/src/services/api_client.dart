@@ -255,6 +255,33 @@ class ApiClient {
     return {'Authorization': 'Bearer $token'};
   }
 
+  /// Searches usernames for calling/sharing. Server excludes self and caps
+  /// results; usernames only, no contact details leak.
+  Future<ApiResult<List<String>>> searchUsers(String query) async {
+    if (query.trim().isEmpty) return const ApiResult<List<String>>(data: []);
+    try {
+      final headers = await authHeaders();
+      if (headers.isEmpty) {
+        return const ApiResult<List<String>>(error: 'Not authorized');
+      }
+      final uri = Uri.parse(buildUrl('/api/users/search', {'q': query.trim()}));
+      final response = await http
+          .get(uri, headers: headers)
+          .timeout(const Duration(seconds: 30));
+      if (response.statusCode != 200) {
+        return ApiResult<List<String>>(error: 'Search failed');
+      }
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final names = (body['usernames'] as List?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [];
+      return ApiResult<List<String>>(data: names);
+    } catch (error) {
+      return ApiResult<List<String>>(error: _messageFrom(error));
+    }
+  }
+
   /// Fetches a small JPEG preview for an image, disk-cached by path and
   /// modification time. Returns null for anything unthumbable (video,
   /// documents, errors) — callers fall back to glyphs, never to errors.

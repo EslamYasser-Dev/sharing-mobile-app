@@ -9,6 +9,8 @@ import 'package:share_plus/share_plus.dart';
 
 import '../format.dart';
 import '../models.dart';
+import '../state/auth_controller.dart';
+import '../state/call_controller.dart';
 import '../state/p2p_controller.dart';
 import '../theme.dart';
 
@@ -64,8 +66,20 @@ class _P2PScreenState extends ConsumerState<P2PScreen> {
     }
   }
 
-  Future<void> _shareReceived(P2PTransfer transfer) async {
-    final path = transfer.localPath;
+  Future<void> _startCall(P2PPeer peer, bool video) async {
+    await ref
+        .read(callControllerProvider.notifier)
+        .startCall(peerId: peer.id, peerLabel: peer.user, video: video);
+    if (!mounted) return;
+    final error = ref.read(callControllerProvider).error;
+    if (error != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error)));
+    }
+  }
+
+  Future<void> _shareReceived(P2PTransfer transfer) async {    final path = transfer.localPath;
     if (path == null) return;
     await SharePlus.instance.share(
       ShareParams(files: [XFile(path)], title: transfer.name),
@@ -121,6 +135,12 @@ class _P2PScreenState extends ConsumerState<P2PScreen> {
             const SizedBox(height: 20),
             _panel(
               pal: pal,
+              title: 'CALL SOMEONE',
+              child: const _UserSearch(),
+            ),
+            const SizedBox(height: 20),
+            _panel(
+              pal: pal,
               title: p2p.peers.length == 1
                   ? '1 PEER'
                   : '${p2p.peers.length} PEERS',
@@ -134,6 +154,12 @@ class _P2PScreenState extends ConsumerState<P2PScreen> {
                             pal: pal,
                             enabled: p2p.connected && !_picking,
                             onSend: () => unawaited(_pickAndSend(peer)),
+                            onCallVoice: () => unawaited(
+                              _startCall(peer, false),
+                            ),
+                            onCallVideo: () => unawaited(
+                              _startCall(peer, true),
+                            ),
                           ),
                       ],
                     ),
@@ -301,21 +327,25 @@ class _StatusRow extends StatelessWidget {
   }
 }
 
-class _PeerRow extends StatelessWidget {
+class _PeerRow extends ConsumerWidget {
   const _PeerRow({
     required this.peer,
     required this.pal,
     required this.enabled,
     required this.onSend,
+    required this.onCallVoice,
+    required this.onCallVideo,
   });
 
   final P2PPeer peer;
   final SfsPalette pal;
   final bool enabled;
   final VoidCallback onSend;
+  final VoidCallback onCallVoice;
+  final VoidCallback onCallVideo;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final label = (peer.user != null && peer.user!.isNotEmpty)
         ? peer.user!
         : 'Anonymous';
@@ -366,6 +396,16 @@ class _PeerRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
+          IconButton(
+            tooltip: 'Voice call',
+            icon: Icon(Icons.call_outlined, color: pal.accent, size: 20),
+            onPressed: enabled ? onCallVoice : null,
+          ),
+          IconButton(
+            tooltip: 'Video call',
+            icon: Icon(Icons.videocam_outlined, color: pal.accent, size: 20),
+            onPressed: enabled ? onCallVideo : null,
+          ),
           FilledButton.icon(
             onPressed: enabled ? onSend : null,
             icon: const Icon(Icons.near_me_outlined, size: 14),
@@ -377,8 +417,211 @@ class _PeerRow extends StatelessWidget {
   }
 }
 
-class _TransferRow extends StatelessWidget {
-  const _TransferRow({
+/// Username search for calling: debounced server lookup with presence.
+/// Online users (currently on the relay) get voice/video buttons; offline
+/// users are shown greyed because the relay can only signal live peers.
+class _UserSearch extends ConsumerStatefulWidget {
+  const _UserSearch();
+
+  @override
+  ConsumerState<_UserSearch> createState() => _UserSearchState();
+}
+
+class _UserSearchState extends ConsumerState<_UserSearch> {
+  final _query = TextEditingController();
+  Timer? _debounce;
+  List<String> _results = const [];
+  bool _searching = false;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _query.dispose();
+    super.dispose();
+  }
+
+  void _onChanged(String value) {
+    _debounce?.cancel();
+    if (value.trim().isEmpty) {
+      setState(() {
+        _results = const [];
+        _searching = false;
+      });
+      return;
+    }
+    setState(() => _searching = true);
+    _debounce = Timer(const Duration(milliseconds: 400), () async {
+      final res = await ref.read(apiClientProvider).searchUsers(value);
+      if (!mounted) return;
+      setState(() {
+        _searching = false;
+        _results = res.data ?? const [];
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = SfsPalette.of(context);
+    final peers = ref.watch(p2pControllerProvider).peers;
+    final byUser = <String, P2PPeer>{};
+    for (final peer in peers) {
+      final user = peer.user;
+      if (user != null && user.isNotEmpty) byUser[user] = peer;
+    }
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: TextField(
+            controller: _query,
+            autocorrect: false,
+            enableSuggestions: false,
+            textInputAction: TextInputAction.search,
+            onChanged: _onChanged,
+            decoration: InputDecoration(
+              hintText: 'Search by name…',
+              prefixIcon: Icon(Icons.search, color: pal.muted, size: 20),
+              suffixIcon: _searching
+                  ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : null,
+            ),
+          ),
+        ),
+        for (final name in _results)
+          _SearchRow(
+            name: name,
+            peer: byUser[name],
+            pal: pal,
+          ),
+        if (_results.isEmpty && _query.text.trim().isNotEmpty && !_searching)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              'No users found',
+              style: TextStyle(color: pal.muted, fontSize: 13),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _SearchRow extends ConsumerWidget {
+  const _SearchRow({required this.name, required this.peer, required this.pal});
+
+  final String name;
+  final P2PPeer? peer;
+  final SfsPalette pal;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final online = peer != null;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: pal.rule)),
+      ),
+      child: Row(
+        children: [
+          Stack(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: pal.accentDim,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Text(
+                  name.substring(0, 1).toUpperCase(),
+                  style: TextStyle(
+                    color: pal.accent,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Semantics(
+                  label: online ? 'Online' : 'Offline',
+                  child: Container(
+                    width: 11,
+                    height: 11,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: online
+                          ? const Color(0xFF34C759)
+                          : pal.muted.withValues(alpha: 0.5),
+                      border: Border.all(color: pal.card, width: 2),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: online ? pal.text : pal.muted,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  online ? 'Online — can call' : 'Offline',
+                  style: TextStyle(color: pal.muted, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          if (online) ...[
+            IconButton(
+              tooltip: 'Voice call $name',
+              icon: Icon(Icons.call_outlined, color: pal.accent, size: 20),
+              onPressed: () => unawaited(
+                ref.read(callControllerProvider.notifier).startCall(
+                  peerId: peer!.id,
+                  peerLabel: name,
+                  video: false,
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Video call $name',
+              icon: Icon(Icons.videocam_outlined, color: pal.accent, size: 20),
+              onPressed: () => unawaited(
+                ref.read(callControllerProvider.notifier).startCall(
+                  peerId: peer!.id,
+                  peerLabel: name,
+                  video: true,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TransferRow extends StatelessWidget {  const _TransferRow({
     required this.transfer,
     required this.pal,
     required this.onDismiss,
