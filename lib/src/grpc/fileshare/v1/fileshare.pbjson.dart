@@ -211,13 +211,16 @@ const CreateShareRequest$json = {
       '5': 3,
       '10': 'expiresInSeconds'
     },
+    {'1': 'password', '3': 3, '4': 1, '5': 9, '10': 'password'},
+    {'1': 'max_downloads', '3': 4, '4': 1, '5': 5, '10': 'maxDownloads'},
   ],
 };
 
 /// Descriptor for `CreateShareRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List createShareRequestDescriptor = $convert.base64Decode(
     'ChJDcmVhdGVTaGFyZVJlcXVlc3QSEgoEcGF0aBgBIAEoCVIEcGF0aBIsChJleHBpcmVzX2luX3'
-    'NlY29uZHMYAiABKANSEGV4cGlyZXNJblNlY29uZHM=');
+    'NlY29uZHMYAiABKANSEGV4cGlyZXNJblNlY29uZHMSGgoIcGFzc3dvcmQYAyABKAlSCHBhc3N3'
+    'b3JkEiMKDW1heF9kb3dubG9hZHMYBCABKAVSDG1heERvd25sb2Fkcw==');
 
 @$core.Deprecated('Use shareDescriptor instead')
 const Share$json = {
@@ -229,6 +232,15 @@ const Share$json = {
     {'1': 'owner', '3': 4, '4': 1, '5': 9, '10': 'owner'},
     {'1': 'created_at', '3': 5, '4': 1, '5': 9, '10': 'createdAt'},
     {'1': 'expires_at', '3': 6, '4': 1, '5': 9, '10': 'expiresAt'},
+    {
+      '1': 'password_protected',
+      '3': 7,
+      '4': 1,
+      '5': 8,
+      '10': 'passwordProtected'
+    },
+    {'1': 'max_downloads', '3': 8, '4': 1, '5': 5, '10': 'maxDownloads'},
+    {'1': 'downloads', '3': 9, '4': 1, '5': 5, '10': 'downloads'},
   ],
 };
 
@@ -236,7 +248,9 @@ const Share$json = {
 final $typed_data.Uint8List shareDescriptor = $convert.base64Decode(
     'CgVTaGFyZRIUCgV0b2tlbhgBIAEoCVIFdG9rZW4SEgoEcGF0aBgCIAEoCVIEcGF0aBISCgRuYW'
     '1lGAMgASgJUgRuYW1lEhQKBW93bmVyGAQgASgJUgVvd25lchIdCgpjcmVhdGVkX2F0GAUgASgJ'
-    'UgljcmVhdGVkQXQSHQoKZXhwaXJlc19hdBgGIAEoCVIJZXhwaXJlc0F0');
+    'UgljcmVhdGVkQXQSHQoKZXhwaXJlc19hdBgGIAEoCVIJZXhwaXJlc0F0Ei0KEnBhc3N3b3JkX3'
+    'Byb3RlY3RlZBgHIAEoCFIRcGFzc3dvcmRQcm90ZWN0ZWQSIwoNbWF4X2Rvd25sb2FkcxgIIAEo'
+    'BVIMbWF4RG93bmxvYWRzEhwKCWRvd25sb2FkcxgJIAEoBVIJZG93bmxvYWRz');
 
 @$core.Deprecated('Use listSharesRequestDescriptor instead')
 const ListSharesRequest$json = {
@@ -582,3 +596,250 @@ const DownloadChunk$json = {
 final $typed_data.Uint8List downloadChunkDescriptor = $convert.base64Decode(
     'Cg1Eb3dubG9hZENodW5rEhoKCGZpbGVuYW1lGAEgASgJUghmaWxlbmFtZRIhCgxjb250ZW50X3'
     'R5cGUYAiABKAlSC2NvbnRlbnRUeXBlEhIKBGRhdGEYAyABKAxSBGRhdGE=');
+
+@$core.Deprecated('Use followRequestDescriptor instead')
+const FollowRequest$json = {
+  '1': 'FollowRequest',
+  '2': [
+    {'1': 'username', '3': 1, '4': 1, '5': 9, '10': 'username'},
+  ],
+};
+
+/// Descriptor for `FollowRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List followRequestDescriptor = $convert.base64Decode(
+    'Cg1Gb2xsb3dSZXF1ZXN0EhoKCHVzZXJuYW1lGAEgASgJUgh1c2VybmFtZQ==');
+
+@$core.Deprecated('Use followResponseDescriptor instead')
+const FollowResponse$json = {
+  '1': 'FollowResponse',
+  '2': [
+    {'1': 'username', '3': 1, '4': 1, '5': 9, '10': 'username'},
+    {'1': 'following', '3': 2, '4': 1, '5': 8, '10': 'following'},
+  ],
+};
+
+/// Descriptor for `FollowResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List followResponseDescriptor = $convert.base64Decode(
+    'Cg5Gb2xsb3dSZXNwb25zZRIaCgh1c2VybmFtZRgBIAEoCVIIdXNlcm5hbWUSHAoJZm9sbG93aW'
+    '5nGAIgASgIUglmb2xsb3dpbmc=');
+
+@$core.Deprecated('Use unfollowRequestDescriptor instead')
+const UnfollowRequest$json = {
+  '1': 'UnfollowRequest',
+  '2': [
+    {'1': 'username', '3': 1, '4': 1, '5': 9, '10': 'username'},
+  ],
+};
+
+/// Descriptor for `UnfollowRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List unfollowRequestDescriptor = $convert.base64Decode(
+    'Cg9VbmZvbGxvd1JlcXVlc3QSGgoIdXNlcm5hbWUYASABKAlSCHVzZXJuYW1l');
+
+@$core.Deprecated('Use unfollowResponseDescriptor instead')
+const UnfollowResponse$json = {
+  '1': 'UnfollowResponse',
+  '2': [
+    {'1': 'username', '3': 1, '4': 1, '5': 9, '10': 'username'},
+    {'1': 'following', '3': 2, '4': 1, '5': 8, '10': 'following'},
+  ],
+};
+
+/// Descriptor for `UnfollowResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List unfollowResponseDescriptor = $convert.base64Decode(
+    'ChBVbmZvbGxvd1Jlc3BvbnNlEhoKCHVzZXJuYW1lGAEgASgJUgh1c2VybmFtZRIcCglmb2xsb3'
+    'dpbmcYAiABKAhSCWZvbGxvd2luZw==');
+
+@$core.Deprecated('Use isFollowingRequestDescriptor instead')
+const IsFollowingRequest$json = {
+  '1': 'IsFollowingRequest',
+  '2': [
+    {'1': 'username', '3': 1, '4': 1, '5': 9, '10': 'username'},
+  ],
+};
+
+/// Descriptor for `IsFollowingRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List isFollowingRequestDescriptor =
+    $convert.base64Decode(
+        'ChJJc0ZvbGxvd2luZ1JlcXVlc3QSGgoIdXNlcm5hbWUYASABKAlSCHVzZXJuYW1l');
+
+@$core.Deprecated('Use isFollowingResponseDescriptor instead')
+const IsFollowingResponse$json = {
+  '1': 'IsFollowingResponse',
+  '2': [
+    {'1': 'username', '3': 1, '4': 1, '5': 9, '10': 'username'},
+    {'1': 'following', '3': 2, '4': 1, '5': 8, '10': 'following'},
+  ],
+};
+
+/// Descriptor for `IsFollowingResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List isFollowingResponseDescriptor = $convert.base64Decode(
+    'ChNJc0ZvbGxvd2luZ1Jlc3BvbnNlEhoKCHVzZXJuYW1lGAEgASgJUgh1c2VybmFtZRIcCglmb2'
+    'xsb3dpbmcYAiABKAhSCWZvbGxvd2luZw==');
+
+@$core.Deprecated('Use listFollowersRequestDescriptor instead')
+const ListFollowersRequest$json = {
+  '1': 'ListFollowersRequest',
+  '2': [
+    {'1': 'username', '3': 1, '4': 1, '5': 9, '10': 'username'},
+  ],
+};
+
+/// Descriptor for `ListFollowersRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listFollowersRequestDescriptor =
+    $convert.base64Decode(
+        'ChRMaXN0Rm9sbG93ZXJzUmVxdWVzdBIaCgh1c2VybmFtZRgBIAEoCVIIdXNlcm5hbWU=');
+
+@$core.Deprecated('Use listFollowersResponseDescriptor instead')
+const ListFollowersResponse$json = {
+  '1': 'ListFollowersResponse',
+  '2': [
+    {'1': 'usernames', '3': 1, '4': 3, '5': 9, '10': 'usernames'},
+  ],
+};
+
+/// Descriptor for `ListFollowersResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listFollowersResponseDescriptor = $convert.base64Decode(
+    'ChVMaXN0Rm9sbG93ZXJzUmVzcG9uc2USHAoJdXNlcm5hbWVzGAEgAygJUgl1c2VybmFtZXM=');
+
+@$core.Deprecated('Use listFollowingRequestDescriptor instead')
+const ListFollowingRequest$json = {
+  '1': 'ListFollowingRequest',
+  '2': [
+    {'1': 'username', '3': 1, '4': 1, '5': 9, '10': 'username'},
+  ],
+};
+
+/// Descriptor for `ListFollowingRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listFollowingRequestDescriptor =
+    $convert.base64Decode(
+        'ChRMaXN0Rm9sbG93aW5nUmVxdWVzdBIaCgh1c2VybmFtZRgBIAEoCVIIdXNlcm5hbWU=');
+
+@$core.Deprecated('Use listFollowingResponseDescriptor instead')
+const ListFollowingResponse$json = {
+  '1': 'ListFollowingResponse',
+  '2': [
+    {'1': 'usernames', '3': 1, '4': 3, '5': 9, '10': 'usernames'},
+  ],
+};
+
+/// Descriptor for `ListFollowingResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listFollowingResponseDescriptor = $convert.base64Decode(
+    'ChVMaXN0Rm9sbG93aW5nUmVzcG9uc2USHAoJdXNlcm5hbWVzGAEgAygJUgl1c2VybmFtZXM=');
+
+@$core.Deprecated('Use fileVisibilityDescriptor instead')
+const FileVisibility$json = {
+  '1': 'FileVisibility',
+  '2': [
+    {'1': 'owner', '3': 1, '4': 1, '5': 9, '10': 'owner'},
+    {'1': 'path', '3': 2, '4': 1, '5': 9, '10': 'path'},
+    {'1': 'level', '3': 3, '4': 1, '5': 9, '10': 'level'},
+    {'1': 'allow_stream', '3': 4, '4': 1, '5': 8, '10': 'allowStream'},
+    {'1': 'updated_at', '3': 5, '4': 1, '5': 9, '10': 'updatedAt'},
+  ],
+};
+
+/// Descriptor for `FileVisibility`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List fileVisibilityDescriptor = $convert.base64Decode(
+    'Cg5GaWxlVmlzaWJpbGl0eRIUCgVvd25lchgBIAEoCVIFb3duZXISEgoEcGF0aBgCIAEoCVIEcG'
+    'F0aBIUCgVsZXZlbBgDIAEoCVIFbGV2ZWwSIQoMYWxsb3dfc3RyZWFtGAQgASgIUgthbGxvd1N0'
+    'cmVhbRIdCgp1cGRhdGVkX2F0GAUgASgJUgl1cGRhdGVkQXQ=');
+
+@$core.Deprecated('Use setVisibilityRequestDescriptor instead')
+const SetVisibilityRequest$json = {
+  '1': 'SetVisibilityRequest',
+  '2': [
+    {'1': 'path', '3': 1, '4': 1, '5': 9, '10': 'path'},
+    {'1': 'level', '3': 2, '4': 1, '5': 9, '10': 'level'},
+    {'1': 'allow_stream', '3': 3, '4': 1, '5': 8, '10': 'allowStream'},
+  ],
+};
+
+/// Descriptor for `SetVisibilityRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setVisibilityRequestDescriptor = $convert.base64Decode(
+    'ChRTZXRWaXNpYmlsaXR5UmVxdWVzdBISCgRwYXRoGAEgASgJUgRwYXRoEhQKBWxldmVsGAIgAS'
+    'gJUgVsZXZlbBIhCgxhbGxvd19zdHJlYW0YAyABKAhSC2FsbG93U3RyZWFt');
+
+@$core.Deprecated('Use getVisibilityRequestDescriptor instead')
+const GetVisibilityRequest$json = {
+  '1': 'GetVisibilityRequest',
+  '2': [
+    {'1': 'owner', '3': 1, '4': 1, '5': 9, '10': 'owner'},
+    {'1': 'path', '3': 2, '4': 1, '5': 9, '10': 'path'},
+  ],
+};
+
+/// Descriptor for `GetVisibilityRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getVisibilityRequestDescriptor = $convert.base64Decode(
+    'ChRHZXRWaXNpYmlsaXR5UmVxdWVzdBIUCgVvd25lchgBIAEoCVIFb3duZXISEgoEcGF0aBgCIA'
+    'EoCVIEcGF0aA==');
+
+@$core.Deprecated('Use timelineEventDescriptor instead')
+const TimelineEvent$json = {
+  '1': 'TimelineEvent',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    {'1': 'owner', '3': 2, '4': 1, '5': 9, '10': 'owner'},
+    {'1': 'kind', '3': 3, '4': 1, '5': 9, '10': 'kind'},
+    {'1': 'path', '3': 4, '4': 1, '5': 9, '10': 'path'},
+    {'1': 'name', '3': 5, '4': 1, '5': 9, '10': 'name'},
+    {'1': 'size', '3': 6, '4': 1, '5': 3, '10': 'size'},
+    {'1': 'visibility', '3': 7, '4': 1, '5': 9, '10': 'visibility'},
+    {'1': 'created_at', '3': 8, '4': 1, '5': 9, '10': 'createdAt'},
+  ],
+};
+
+/// Descriptor for `TimelineEvent`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List timelineEventDescriptor = $convert.base64Decode(
+    'Cg1UaW1lbGluZUV2ZW50Eg4KAmlkGAEgASgJUgJpZBIUCgVvd25lchgCIAEoCVIFb3duZXISEg'
+    'oEa2luZBgDIAEoCVIEa2luZBISCgRwYXRoGAQgASgJUgRwYXRoEhIKBG5hbWUYBSABKAlSBG5h'
+    'bWUSEgoEc2l6ZRgGIAEoA1IEc2l6ZRIeCgp2aXNpYmlsaXR5GAcgASgJUgp2aXNpYmlsaXR5Eh'
+    '0KCmNyZWF0ZWRfYXQYCCABKAlSCWNyZWF0ZWRBdA==');
+
+@$core.Deprecated('Use listFeedRequestDescriptor instead')
+const ListFeedRequest$json = {
+  '1': 'ListFeedRequest',
+  '2': [
+    {'1': 'cursor', '3': 1, '4': 1, '5': 9, '10': 'cursor'},
+    {'1': 'limit', '3': 2, '4': 1, '5': 5, '10': 'limit'},
+  ],
+};
+
+/// Descriptor for `ListFeedRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listFeedRequestDescriptor = $convert.base64Decode(
+    'Cg9MaXN0RmVlZFJlcXVlc3QSFgoGY3Vyc29yGAEgASgJUgZjdXJzb3ISFAoFbGltaXQYAiABKA'
+    'VSBWxpbWl0');
+
+@$core.Deprecated('Use listFeedResponseDescriptor instead')
+const ListFeedResponse$json = {
+  '1': 'ListFeedResponse',
+  '2': [
+    {
+      '1': 'events',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.fileshare.v1.TimelineEvent',
+      '10': 'events'
+    },
+    {'1': 'next_cursor', '3': 2, '4': 1, '5': 9, '10': 'nextCursor'},
+  ],
+};
+
+/// Descriptor for `ListFeedResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List listFeedResponseDescriptor = $convert.base64Decode(
+    'ChBMaXN0RmVlZFJlc3BvbnNlEjMKBmV2ZW50cxgBIAMoCzIbLmZpbGVzaGFyZS52MS5UaW1lbG'
+    'luZUV2ZW50UgZldmVudHMSHwoLbmV4dF9jdXJzb3IYAiABKAlSCm5leHRDdXJzb3I=');
+
+@$core.Deprecated('Use downloadSharedRequestDescriptor instead')
+const DownloadSharedRequest$json = {
+  '1': 'DownloadSharedRequest',
+  '2': [
+    {'1': 'owner', '3': 1, '4': 1, '5': 9, '10': 'owner'},
+    {'1': 'path', '3': 2, '4': 1, '5': 9, '10': 'path'},
+  ],
+};
+
+/// Descriptor for `DownloadSharedRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List downloadSharedRequestDescriptor = $convert.base64Decode(
+    'ChVEb3dubG9hZFNoYXJlZFJlcXVlc3QSFAoFb3duZXIYASABKAlSBW93bmVyEhIKBHBhdGgYAi'
+    'ABKAlSBHBhdGg=');

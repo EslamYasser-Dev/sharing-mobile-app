@@ -82,6 +82,9 @@ class GrpcConnection {
   late final Future<EventsServiceClient> events = _channel.then(
     (channel) => EventsServiceClient(channel),
   );
+  late final Future<SocialServiceClient> social = _channel.then(
+    (channel) => SocialServiceClient(channel),
+  );
 
   Future<void> shutdown() async {
     final provided = _providedChannel;

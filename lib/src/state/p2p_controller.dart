@@ -10,6 +10,7 @@ import '../models.dart';
 import '../services/p2p_session.dart';
 import '../services/p2p_signaling.dart';
 import '../services/token_store.dart';
+import 'nearby_enabled_controller.dart';
 
 /// Everything the P2P screen renders.
 class P2PState {
@@ -78,11 +79,16 @@ class P2PController extends Notifier<P2PState> {
   @override
   P2PState build() {
     ref.onDispose(_stop);
+    // Master switch: turning nearby off tears the session down immediately.
+    ref.listen<bool>(nearbyEnabledProvider, (_, enabled) {
+      if (!enabled) _stop();
+    });
     return const P2PState();
   }
 
   void start() {
     if (_running) return;
+    if (!ref.read(nearbyEnabledProvider)) return;
     _running = true;
     _retryDelay = 1000;
     unawaited(_open(_generation));

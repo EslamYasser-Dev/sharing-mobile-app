@@ -1,3 +1,6 @@
+export 'models/transfer.dart';
+export 'models/peer.dart';
+
 class FileItem {
   const FileItem({
     required this.name,
@@ -74,6 +77,9 @@ class ShareItem {
     required this.owner,
     required this.createdAt,
     required this.expiresAt,
+    this.passwordProtected = false,
+    this.maxDownloads = 0,
+    this.downloads = 0,
   });
 
   final String token;
@@ -82,6 +88,13 @@ class ShareItem {
   final String owner;
   final String createdAt;
   final String expiresAt;
+  final bool passwordProtected;
+  final int maxDownloads;
+  final int downloads;
+
+  bool get isLimited => maxDownloads > 0;
+  int get remainingDownloads =>
+      isLimited ? (maxDownloads - downloads).clamp(0, maxDownloads) : -1;
 
   factory ShareItem.fromJson(Map<String, dynamic> json) => ShareItem(
     token: json['token'] as String? ?? '',
@@ -90,7 +103,101 @@ class ShareItem {
     owner: json['owner'] as String? ?? '',
     createdAt: json['createdAt'] as String? ?? '',
     expiresAt: json['expiresAt'] as String? ?? '',
+    passwordProtected: json['passwordProtected'] as bool? ?? false,
+    maxDownloads: (json['maxDownloads'] as num?)?.toInt() ?? 0,
+    downloads: (json['downloads'] as num?)?.toInt() ?? 0,
   );
+}
+
+/// Per-file privacy setting. Absence on the server means private.
+class VisibilitySetting {
+  const VisibilitySetting({
+    required this.owner,
+    required this.path,
+    required this.level,
+    required this.allowStream,
+    required this.updatedAt,
+  });
+
+  static const String private = 'private';
+  static const String link = 'link';
+  static const String pub = 'public';
+
+  static const List<String> levels = [private, link, pub];
+
+  final String owner;
+  final String path;
+  final String level;
+  final bool allowStream;
+  final String updatedAt;
+
+  bool get isPrivate => level == private;
+  bool get isLink => level == link;
+  bool get isPublic => level == pub;
+
+  factory VisibilitySetting.fromJson(Map<String, dynamic> json) =>
+      VisibilitySetting(
+        owner: json['owner'] as String? ?? '',
+        path: json['path'] as String? ?? '',
+        level: json['level'] as String? ?? private,
+        allowStream: json['allowStream'] as bool? ?? false,
+        updatedAt: json['updatedAt'] as String? ?? '',
+      );
+}
+
+/// One upload-timeline feed entry: metadata only, never content.
+class FeedEvent {
+  const FeedEvent({
+    required this.id,
+    required this.owner,
+    required this.kind,
+    required this.path,
+    required this.name,
+    required this.size,
+    required this.visibility,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String owner;
+  final String kind;
+  final String path;
+  final String name;
+  final int size;
+  final String visibility;
+  final String createdAt;
+
+  FeedEvent copyWith({String? visibility}) => FeedEvent(
+    id: id,
+    owner: owner,
+    kind: kind,
+    path: path,
+    name: name,
+    size: size,
+    visibility: visibility ?? this.visibility,
+    createdAt: createdAt,
+  );
+
+  factory FeedEvent.fromJson(Map<String, dynamic> json) => FeedEvent(
+    id: json['id'] as String? ?? '',
+    owner: json['owner'] as String? ?? '',
+    kind: json['kind'] as String? ?? '',
+    path: json['path'] as String? ?? '',
+    name: json['name'] as String? ?? '',
+    size: (json['size'] as num?)?.toInt() ?? 0,
+    visibility: json['visibility'] as String? ?? VisibilitySetting.private,
+    createdAt: json['createdAt'] as String? ?? '',
+  );
+}
+
+/// One cursor page of the upload timeline.
+class FeedPage {
+  const FeedPage({required this.events, required this.nextCursor});
+
+  final List<FeedEvent> events;
+  final String nextCursor;
+
+  bool get hasMore => nextCursor.isNotEmpty;
 }
 
 class TokenResponse {
@@ -108,6 +215,30 @@ class TokenResponse {
     accessToken: json['accessToken'] as String? ?? '',
     tokenType: json['tokenType'] as String? ?? '',
     expiresIn: (json['expiresIn'] as num?)?.toInt() ?? 0,
+  );
+}
+
+class GoogleTokenExchangeResponse {
+  const GoogleTokenExchangeResponse({
+    required this.accessToken,
+    required this.tokenType,
+    required this.expiresIn,
+    this.user,
+    this.isNewAccount,
+  });
+
+  final String accessToken;
+  final String tokenType;
+  final int expiresIn;
+  final AuthUser? user;
+  final bool? isNewAccount;
+
+  factory GoogleTokenExchangeResponse.fromJson(Map<String, dynamic> json) => GoogleTokenExchangeResponse(
+    accessToken: json['accessToken'] as String? ?? '',
+    tokenType: json['tokenType'] as String? ?? 'Bearer',
+    expiresIn: (json['expiresIn'] as num?)?.toInt() ?? 0,
+    user: json['user'] != null ? AuthUser.fromJson(json['user'] as Map<String, dynamic>) : null,
+    isNewAccount: json['isNewAccount'] as bool?,
   );
 }
 

@@ -912,10 +912,14 @@ class CreateShareRequest extends $pb.GeneratedMessage {
   factory CreateShareRequest({
     $core.String? path,
     $fixnum.Int64? expiresInSeconds,
+    $core.String? password,
+    $core.int? maxDownloads,
   }) {
     final result = CreateShareRequest._();
     if (path != null) result.path = path;
     if (expiresInSeconds != null) result.expiresInSeconds = expiresInSeconds;
+    if (password != null) result.password = password;
+    if (maxDownloads != null) result.maxDownloads = maxDownloads;
     return result;
   }
 
@@ -934,6 +938,8 @@ class CreateShareRequest extends $pb.GeneratedMessage {
       createEmptyInstance: CreateShareRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'path')
     ..aInt64(2, _omitFieldNames ? '' : 'expiresInSeconds')
+    ..aOS(3, _omitFieldNames ? '' : 'password')
+    ..aI(4, _omitFieldNames ? '' : 'maxDownloads')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -975,6 +981,27 @@ class CreateShareRequest extends $pb.GeneratedMessage {
   $core.bool hasExpiresInSeconds() => $_has(1);
   @$pb.TagNumber(2)
   void clearExpiresInSeconds() => $_clearField(2);
+
+  /// Optional link password (empty = public). Plaintext on the wire is
+  /// protected by TLS; only the hash is stored.
+  @$pb.TagNumber(3)
+  $core.String get password => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set password($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasPassword() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearPassword() => $_clearField(3);
+
+  /// Optional download cap; 0 = unlimited.
+  @$pb.TagNumber(4)
+  $core.int get maxDownloads => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set maxDownloads($core.int value) => $_setSignedInt32(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasMaxDownloads() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearMaxDownloads() => $_clearField(4);
 }
 
 class Share extends $pb.GeneratedMessage {
@@ -985,6 +1012,9 @@ class Share extends $pb.GeneratedMessage {
     $core.String? owner,
     $core.String? createdAt,
     $core.String? expiresAt,
+    $core.bool? passwordProtected,
+    $core.int? maxDownloads,
+    $core.int? downloads,
   }) {
     final result = Share._();
     if (token != null) result.token = token;
@@ -993,6 +1023,9 @@ class Share extends $pb.GeneratedMessage {
     if (owner != null) result.owner = owner;
     if (createdAt != null) result.createdAt = createdAt;
     if (expiresAt != null) result.expiresAt = expiresAt;
+    if (passwordProtected != null) result.passwordProtected = passwordProtected;
+    if (maxDownloads != null) result.maxDownloads = maxDownloads;
+    if (downloads != null) result.downloads = downloads;
     return result;
   }
 
@@ -1015,6 +1048,9 @@ class Share extends $pb.GeneratedMessage {
     ..aOS(4, _omitFieldNames ? '' : 'owner')
     ..aOS(5, _omitFieldNames ? '' : 'createdAt')
     ..aOS(6, _omitFieldNames ? '' : 'expiresAt')
+    ..aOB(7, _omitFieldNames ? '' : 'passwordProtected')
+    ..aI(8, _omitFieldNames ? '' : 'maxDownloads')
+    ..aI(9, _omitFieldNames ? '' : 'downloads')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1090,6 +1126,33 @@ class Share extends $pb.GeneratedMessage {
   $core.bool hasExpiresAt() => $_has(5);
   @$pb.TagNumber(6)
   void clearExpiresAt() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.bool get passwordProtected => $_getBF(6);
+  @$pb.TagNumber(7)
+  set passwordProtected($core.bool value) => $_setBool(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasPasswordProtected() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearPasswordProtected() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.int get maxDownloads => $_getIZ(7);
+  @$pb.TagNumber(8)
+  set maxDownloads($core.int value) => $_setSignedInt32(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasMaxDownloads() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearMaxDownloads() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.int get downloads => $_getIZ(8);
+  @$pb.TagNumber(9)
+  set downloads($core.int value) => $_setSignedInt32(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasDownloads() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearDownloads() => $_clearField(9);
 }
 
 class ListSharesRequest extends $pb.GeneratedMessage {
@@ -2585,6 +2648,1213 @@ class DownloadChunk extends $pb.GeneratedMessage {
   $core.bool hasData() => $_has(2);
   @$pb.TagNumber(3)
   void clearData() => $_clearField(3);
+}
+
+class FollowRequest extends $pb.GeneratedMessage {
+  factory FollowRequest({
+    $core.String? username,
+  }) {
+    final result = FollowRequest._();
+    if (username != null) result.username = username;
+    return result;
+  }
+
+  FollowRequest._();
+
+  factory FollowRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      FollowRequest()..mergeFromBuffer(data, registry);
+  factory FollowRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      FollowRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'FollowRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: FollowRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'username')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FollowRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FollowRequest copyWith(void Function(FollowRequest) updates) =>
+      super.copyWith((message) => updates(message as FollowRequest))
+          as FollowRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use FollowRequest() / FollowRequest.new instead')
+  static FollowRequest create() => FollowRequest._();
+  static $pb.GeneratedMessage $_createMessage() => FollowRequest._();
+  @$core.override
+  FollowRequest createEmptyInstance() => FollowRequest._();
+  @$core.pragma('dart2js:noInline')
+  static FollowRequest getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FollowRequest>(
+          FollowRequest.$_createMessage);
+  static FollowRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get username => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set username($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasUsername() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUsername() => $_clearField(1);
+}
+
+class FollowResponse extends $pb.GeneratedMessage {
+  factory FollowResponse({
+    $core.String? username,
+    $core.bool? following,
+  }) {
+    final result = FollowResponse._();
+    if (username != null) result.username = username;
+    if (following != null) result.following = following;
+    return result;
+  }
+
+  FollowResponse._();
+
+  factory FollowResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      FollowResponse()..mergeFromBuffer(data, registry);
+  factory FollowResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      FollowResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'FollowResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: FollowResponse.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'username')
+    ..aOB(2, _omitFieldNames ? '' : 'following')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FollowResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FollowResponse copyWith(void Function(FollowResponse) updates) =>
+      super.copyWith((message) => updates(message as FollowResponse))
+          as FollowResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use FollowResponse() / FollowResponse.new instead')
+  static FollowResponse create() => FollowResponse._();
+  static $pb.GeneratedMessage $_createMessage() => FollowResponse._();
+  @$core.override
+  FollowResponse createEmptyInstance() => FollowResponse._();
+  @$core.pragma('dart2js:noInline')
+  static FollowResponse getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FollowResponse>(
+          FollowResponse.$_createMessage);
+  static FollowResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get username => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set username($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasUsername() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUsername() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get following => $_getBF(1);
+  @$pb.TagNumber(2)
+  set following($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasFollowing() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearFollowing() => $_clearField(2);
+}
+
+class UnfollowRequest extends $pb.GeneratedMessage {
+  factory UnfollowRequest({
+    $core.String? username,
+  }) {
+    final result = UnfollowRequest._();
+    if (username != null) result.username = username;
+    return result;
+  }
+
+  UnfollowRequest._();
+
+  factory UnfollowRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      UnfollowRequest()..mergeFromBuffer(data, registry);
+  factory UnfollowRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      UnfollowRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'UnfollowRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: UnfollowRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'username')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UnfollowRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UnfollowRequest copyWith(void Function(UnfollowRequest) updates) =>
+      super.copyWith((message) => updates(message as UnfollowRequest))
+          as UnfollowRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use UnfollowRequest() / UnfollowRequest.new instead')
+  static UnfollowRequest create() => UnfollowRequest._();
+  static $pb.GeneratedMessage $_createMessage() => UnfollowRequest._();
+  @$core.override
+  UnfollowRequest createEmptyInstance() => UnfollowRequest._();
+  @$core.pragma('dart2js:noInline')
+  static UnfollowRequest getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UnfollowRequest>(
+          UnfollowRequest.$_createMessage);
+  static UnfollowRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get username => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set username($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasUsername() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUsername() => $_clearField(1);
+}
+
+class UnfollowResponse extends $pb.GeneratedMessage {
+  factory UnfollowResponse({
+    $core.String? username,
+    $core.bool? following,
+  }) {
+    final result = UnfollowResponse._();
+    if (username != null) result.username = username;
+    if (following != null) result.following = following;
+    return result;
+  }
+
+  UnfollowResponse._();
+
+  factory UnfollowResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      UnfollowResponse()..mergeFromBuffer(data, registry);
+  factory UnfollowResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      UnfollowResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'UnfollowResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: UnfollowResponse.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'username')
+    ..aOB(2, _omitFieldNames ? '' : 'following')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UnfollowResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UnfollowResponse copyWith(void Function(UnfollowResponse) updates) =>
+      super.copyWith((message) => updates(message as UnfollowResponse))
+          as UnfollowResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use UnfollowResponse() / UnfollowResponse.new instead')
+  static UnfollowResponse create() => UnfollowResponse._();
+  static $pb.GeneratedMessage $_createMessage() => UnfollowResponse._();
+  @$core.override
+  UnfollowResponse createEmptyInstance() => UnfollowResponse._();
+  @$core.pragma('dart2js:noInline')
+  static UnfollowResponse getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UnfollowResponse>(
+          UnfollowResponse.$_createMessage);
+  static UnfollowResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get username => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set username($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasUsername() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUsername() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get following => $_getBF(1);
+  @$pb.TagNumber(2)
+  set following($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasFollowing() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearFollowing() => $_clearField(2);
+}
+
+class IsFollowingRequest extends $pb.GeneratedMessage {
+  factory IsFollowingRequest({
+    $core.String? username,
+  }) {
+    final result = IsFollowingRequest._();
+    if (username != null) result.username = username;
+    return result;
+  }
+
+  IsFollowingRequest._();
+
+  factory IsFollowingRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      IsFollowingRequest()..mergeFromBuffer(data, registry);
+  factory IsFollowingRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      IsFollowingRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'IsFollowingRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: IsFollowingRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'username')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  IsFollowingRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  IsFollowingRequest copyWith(void Function(IsFollowingRequest) updates) =>
+      super.copyWith((message) => updates(message as IsFollowingRequest))
+          as IsFollowingRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use IsFollowingRequest() / IsFollowingRequest.new instead')
+  static IsFollowingRequest create() => IsFollowingRequest._();
+  static $pb.GeneratedMessage $_createMessage() => IsFollowingRequest._();
+  @$core.override
+  IsFollowingRequest createEmptyInstance() => IsFollowingRequest._();
+  @$core.pragma('dart2js:noInline')
+  static IsFollowingRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<IsFollowingRequest>(
+          IsFollowingRequest.$_createMessage);
+  static IsFollowingRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get username => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set username($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasUsername() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUsername() => $_clearField(1);
+}
+
+class IsFollowingResponse extends $pb.GeneratedMessage {
+  factory IsFollowingResponse({
+    $core.String? username,
+    $core.bool? following,
+  }) {
+    final result = IsFollowingResponse._();
+    if (username != null) result.username = username;
+    if (following != null) result.following = following;
+    return result;
+  }
+
+  IsFollowingResponse._();
+
+  factory IsFollowingResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      IsFollowingResponse()..mergeFromBuffer(data, registry);
+  factory IsFollowingResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      IsFollowingResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'IsFollowingResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: IsFollowingResponse.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'username')
+    ..aOB(2, _omitFieldNames ? '' : 'following')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  IsFollowingResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  IsFollowingResponse copyWith(void Function(IsFollowingResponse) updates) =>
+      super.copyWith((message) => updates(message as IsFollowingResponse))
+          as IsFollowingResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core
+      .Deprecated('Use IsFollowingResponse() / IsFollowingResponse.new instead')
+  static IsFollowingResponse create() => IsFollowingResponse._();
+  static $pb.GeneratedMessage $_createMessage() => IsFollowingResponse._();
+  @$core.override
+  IsFollowingResponse createEmptyInstance() => IsFollowingResponse._();
+  @$core.pragma('dart2js:noInline')
+  static IsFollowingResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<IsFollowingResponse>(
+          IsFollowingResponse.$_createMessage);
+  static IsFollowingResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get username => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set username($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasUsername() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUsername() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get following => $_getBF(1);
+  @$pb.TagNumber(2)
+  set following($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasFollowing() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearFollowing() => $_clearField(2);
+}
+
+class ListFollowersRequest extends $pb.GeneratedMessage {
+  factory ListFollowersRequest({
+    $core.String? username,
+  }) {
+    final result = ListFollowersRequest._();
+    if (username != null) result.username = username;
+    return result;
+  }
+
+  ListFollowersRequest._();
+
+  factory ListFollowersRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFollowersRequest()..mergeFromBuffer(data, registry);
+  factory ListFollowersRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFollowersRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListFollowersRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: ListFollowersRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'username')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFollowersRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFollowersRequest copyWith(void Function(ListFollowersRequest) updates) =>
+      super.copyWith((message) => updates(message as ListFollowersRequest))
+          as ListFollowersRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ListFollowersRequest() / ListFollowersRequest.new instead')
+  static ListFollowersRequest create() => ListFollowersRequest._();
+  static $pb.GeneratedMessage $_createMessage() => ListFollowersRequest._();
+  @$core.override
+  ListFollowersRequest createEmptyInstance() => ListFollowersRequest._();
+  @$core.pragma('dart2js:noInline')
+  static ListFollowersRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListFollowersRequest>(
+          ListFollowersRequest.$_createMessage);
+  static ListFollowersRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get username => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set username($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasUsername() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUsername() => $_clearField(1);
+}
+
+class ListFollowersResponse extends $pb.GeneratedMessage {
+  factory ListFollowersResponse({
+    $core.Iterable<$core.String>? usernames,
+  }) {
+    final result = ListFollowersResponse._();
+    if (usernames != null) result.usernames.addAll(usernames);
+    return result;
+  }
+
+  ListFollowersResponse._();
+
+  factory ListFollowersResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFollowersResponse()..mergeFromBuffer(data, registry);
+  factory ListFollowersResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFollowersResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListFollowersResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: ListFollowersResponse.$_createMessage)
+    ..pPS(1, _omitFieldNames ? '' : 'usernames')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFollowersResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFollowersResponse copyWith(
+          void Function(ListFollowersResponse) updates) =>
+      super.copyWith((message) => updates(message as ListFollowersResponse))
+          as ListFollowersResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ListFollowersResponse() / ListFollowersResponse.new instead')
+  static ListFollowersResponse create() => ListFollowersResponse._();
+  static $pb.GeneratedMessage $_createMessage() => ListFollowersResponse._();
+  @$core.override
+  ListFollowersResponse createEmptyInstance() => ListFollowersResponse._();
+  @$core.pragma('dart2js:noInline')
+  static ListFollowersResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListFollowersResponse>(
+          ListFollowersResponse.$_createMessage);
+  static ListFollowersResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get usernames => $_getList(0);
+}
+
+class ListFollowingRequest extends $pb.GeneratedMessage {
+  factory ListFollowingRequest({
+    $core.String? username,
+  }) {
+    final result = ListFollowingRequest._();
+    if (username != null) result.username = username;
+    return result;
+  }
+
+  ListFollowingRequest._();
+
+  factory ListFollowingRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFollowingRequest()..mergeFromBuffer(data, registry);
+  factory ListFollowingRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFollowingRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListFollowingRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: ListFollowingRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'username')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFollowingRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFollowingRequest copyWith(void Function(ListFollowingRequest) updates) =>
+      super.copyWith((message) => updates(message as ListFollowingRequest))
+          as ListFollowingRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ListFollowingRequest() / ListFollowingRequest.new instead')
+  static ListFollowingRequest create() => ListFollowingRequest._();
+  static $pb.GeneratedMessage $_createMessage() => ListFollowingRequest._();
+  @$core.override
+  ListFollowingRequest createEmptyInstance() => ListFollowingRequest._();
+  @$core.pragma('dart2js:noInline')
+  static ListFollowingRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListFollowingRequest>(
+          ListFollowingRequest.$_createMessage);
+  static ListFollowingRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get username => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set username($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasUsername() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUsername() => $_clearField(1);
+}
+
+class ListFollowingResponse extends $pb.GeneratedMessage {
+  factory ListFollowingResponse({
+    $core.Iterable<$core.String>? usernames,
+  }) {
+    final result = ListFollowingResponse._();
+    if (usernames != null) result.usernames.addAll(usernames);
+    return result;
+  }
+
+  ListFollowingResponse._();
+
+  factory ListFollowingResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFollowingResponse()..mergeFromBuffer(data, registry);
+  factory ListFollowingResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFollowingResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListFollowingResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: ListFollowingResponse.$_createMessage)
+    ..pPS(1, _omitFieldNames ? '' : 'usernames')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFollowingResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFollowingResponse copyWith(
+          void Function(ListFollowingResponse) updates) =>
+      super.copyWith((message) => updates(message as ListFollowingResponse))
+          as ListFollowingResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use ListFollowingResponse() / ListFollowingResponse.new instead')
+  static ListFollowingResponse create() => ListFollowingResponse._();
+  static $pb.GeneratedMessage $_createMessage() => ListFollowingResponse._();
+  @$core.override
+  ListFollowingResponse createEmptyInstance() => ListFollowingResponse._();
+  @$core.pragma('dart2js:noInline')
+  static ListFollowingResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ListFollowingResponse>(
+          ListFollowingResponse.$_createMessage);
+  static ListFollowingResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get usernames => $_getList(0);
+}
+
+class FileVisibility extends $pb.GeneratedMessage {
+  factory FileVisibility({
+    $core.String? owner,
+    $core.String? path,
+    $core.String? level,
+    $core.bool? allowStream,
+    $core.String? updatedAt,
+  }) {
+    final result = FileVisibility._();
+    if (owner != null) result.owner = owner;
+    if (path != null) result.path = path;
+    if (level != null) result.level = level;
+    if (allowStream != null) result.allowStream = allowStream;
+    if (updatedAt != null) result.updatedAt = updatedAt;
+    return result;
+  }
+
+  FileVisibility._();
+
+  factory FileVisibility.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      FileVisibility()..mergeFromBuffer(data, registry);
+  factory FileVisibility.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      FileVisibility()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'FileVisibility',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: FileVisibility.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'owner')
+    ..aOS(2, _omitFieldNames ? '' : 'path')
+    ..aOS(3, _omitFieldNames ? '' : 'level')
+    ..aOB(4, _omitFieldNames ? '' : 'allowStream')
+    ..aOS(5, _omitFieldNames ? '' : 'updatedAt')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FileVisibility clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  FileVisibility copyWith(void Function(FileVisibility) updates) =>
+      super.copyWith((message) => updates(message as FileVisibility))
+          as FileVisibility;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use FileVisibility() / FileVisibility.new instead')
+  static FileVisibility create() => FileVisibility._();
+  static $pb.GeneratedMessage $_createMessage() => FileVisibility._();
+  @$core.override
+  FileVisibility createEmptyInstance() => FileVisibility._();
+  @$core.pragma('dart2js:noInline')
+  static FileVisibility getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<FileVisibility>(
+          FileVisibility.$_createMessage);
+  static FileVisibility? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get owner => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set owner($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasOwner() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearOwner() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get path => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set path($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPath() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPath() => $_clearField(2);
+
+  /// One of "private", "link", "public".
+  @$pb.TagNumber(3)
+  $core.String get level => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set level($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasLevel() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearLevel() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get allowStream => $_getBF(3);
+  @$pb.TagNumber(4)
+  set allowStream($core.bool value) => $_setBool(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasAllowStream() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearAllowStream() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get updatedAt => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set updatedAt($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasUpdatedAt() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearUpdatedAt() => $_clearField(5);
+}
+
+class SetVisibilityRequest extends $pb.GeneratedMessage {
+  factory SetVisibilityRequest({
+    $core.String? path,
+    $core.String? level,
+    $core.bool? allowStream,
+  }) {
+    final result = SetVisibilityRequest._();
+    if (path != null) result.path = path;
+    if (level != null) result.level = level;
+    if (allowStream != null) result.allowStream = allowStream;
+    return result;
+  }
+
+  SetVisibilityRequest._();
+
+  factory SetVisibilityRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetVisibilityRequest()..mergeFromBuffer(data, registry);
+  factory SetVisibilityRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SetVisibilityRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetVisibilityRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: SetVisibilityRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'path')
+    ..aOS(2, _omitFieldNames ? '' : 'level')
+    ..aOB(3, _omitFieldNames ? '' : 'allowStream')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetVisibilityRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetVisibilityRequest copyWith(void Function(SetVisibilityRequest) updates) =>
+      super.copyWith((message) => updates(message as SetVisibilityRequest))
+          as SetVisibilityRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SetVisibilityRequest() / SetVisibilityRequest.new instead')
+  static SetVisibilityRequest create() => SetVisibilityRequest._();
+  static $pb.GeneratedMessage $_createMessage() => SetVisibilityRequest._();
+  @$core.override
+  SetVisibilityRequest createEmptyInstance() => SetVisibilityRequest._();
+  @$core.pragma('dart2js:noInline')
+  static SetVisibilityRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetVisibilityRequest>(
+          SetVisibilityRequest.$_createMessage);
+  static SetVisibilityRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get path => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set path($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasPath() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPath() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get level => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set level($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasLevel() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLevel() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get allowStream => $_getBF(2);
+  @$pb.TagNumber(3)
+  set allowStream($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasAllowStream() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAllowStream() => $_clearField(3);
+}
+
+class GetVisibilityRequest extends $pb.GeneratedMessage {
+  factory GetVisibilityRequest({
+    $core.String? owner,
+    $core.String? path,
+  }) {
+    final result = GetVisibilityRequest._();
+    if (owner != null) result.owner = owner;
+    if (path != null) result.path = path;
+    return result;
+  }
+
+  GetVisibilityRequest._();
+
+  factory GetVisibilityRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      GetVisibilityRequest()..mergeFromBuffer(data, registry);
+  factory GetVisibilityRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      GetVisibilityRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetVisibilityRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: GetVisibilityRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'owner')
+    ..aOS(2, _omitFieldNames ? '' : 'path')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetVisibilityRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetVisibilityRequest copyWith(void Function(GetVisibilityRequest) updates) =>
+      super.copyWith((message) => updates(message as GetVisibilityRequest))
+          as GetVisibilityRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use GetVisibilityRequest() / GetVisibilityRequest.new instead')
+  static GetVisibilityRequest create() => GetVisibilityRequest._();
+  static $pb.GeneratedMessage $_createMessage() => GetVisibilityRequest._();
+  @$core.override
+  GetVisibilityRequest createEmptyInstance() => GetVisibilityRequest._();
+  @$core.pragma('dart2js:noInline')
+  static GetVisibilityRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetVisibilityRequest>(
+          GetVisibilityRequest.$_createMessage);
+  static GetVisibilityRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get owner => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set owner($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasOwner() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearOwner() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get path => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set path($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPath() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPath() => $_clearField(2);
+}
+
+class TimelineEvent extends $pb.GeneratedMessage {
+  factory TimelineEvent({
+    $core.String? id,
+    $core.String? owner,
+    $core.String? kind,
+    $core.String? path,
+    $core.String? name,
+    $fixnum.Int64? size,
+    $core.String? visibility,
+    $core.String? createdAt,
+  }) {
+    final result = TimelineEvent._();
+    if (id != null) result.id = id;
+    if (owner != null) result.owner = owner;
+    if (kind != null) result.kind = kind;
+    if (path != null) result.path = path;
+    if (name != null) result.name = name;
+    if (size != null) result.size = size;
+    if (visibility != null) result.visibility = visibility;
+    if (createdAt != null) result.createdAt = createdAt;
+    return result;
+  }
+
+  TimelineEvent._();
+
+  factory TimelineEvent.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      TimelineEvent()..mergeFromBuffer(data, registry);
+  factory TimelineEvent.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      TimelineEvent()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'TimelineEvent',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: TimelineEvent.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..aOS(2, _omitFieldNames ? '' : 'owner')
+    ..aOS(3, _omitFieldNames ? '' : 'kind')
+    ..aOS(4, _omitFieldNames ? '' : 'path')
+    ..aOS(5, _omitFieldNames ? '' : 'name')
+    ..aInt64(6, _omitFieldNames ? '' : 'size')
+    ..aOS(7, _omitFieldNames ? '' : 'visibility')
+    ..aOS(8, _omitFieldNames ? '' : 'createdAt')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TimelineEvent clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TimelineEvent copyWith(void Function(TimelineEvent) updates) =>
+      super.copyWith((message) => updates(message as TimelineEvent))
+          as TimelineEvent;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use TimelineEvent() / TimelineEvent.new instead')
+  static TimelineEvent create() => TimelineEvent._();
+  static $pb.GeneratedMessage $_createMessage() => TimelineEvent._();
+  @$core.override
+  TimelineEvent createEmptyInstance() => TimelineEvent._();
+  @$core.pragma('dart2js:noInline')
+  static TimelineEvent getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TimelineEvent>(
+          TimelineEvent.$_createMessage);
+  static TimelineEvent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get id => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set id($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get owner => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set owner($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasOwner() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearOwner() => $_clearField(2);
+
+  /// One of "upload", "share", "visibility".
+  @$pb.TagNumber(3)
+  $core.String get kind => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set kind($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasKind() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearKind() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get path => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set path($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasPath() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearPath() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get name => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set name($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasName() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearName() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $fixnum.Int64 get size => $_getI64(5);
+  @$pb.TagNumber(6)
+  set size($fixnum.Int64 value) => $_setInt64(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasSize() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearSize() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get visibility => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set visibility($core.String value) => $_setString(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasVisibility() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearVisibility() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.String get createdAt => $_getSZ(7);
+  @$pb.TagNumber(8)
+  set createdAt($core.String value) => $_setString(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasCreatedAt() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearCreatedAt() => $_clearField(8);
+}
+
+class ListFeedRequest extends $pb.GeneratedMessage {
+  factory ListFeedRequest({
+    $core.String? cursor,
+    $core.int? limit,
+  }) {
+    final result = ListFeedRequest._();
+    if (cursor != null) result.cursor = cursor;
+    if (limit != null) result.limit = limit;
+    return result;
+  }
+
+  ListFeedRequest._();
+
+  factory ListFeedRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFeedRequest()..mergeFromBuffer(data, registry);
+  factory ListFeedRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFeedRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListFeedRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: ListFeedRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'cursor')
+    ..aI(2, _omitFieldNames ? '' : 'limit')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFeedRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFeedRequest copyWith(void Function(ListFeedRequest) updates) =>
+      super.copyWith((message) => updates(message as ListFeedRequest))
+          as ListFeedRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ListFeedRequest() / ListFeedRequest.new instead')
+  static ListFeedRequest create() => ListFeedRequest._();
+  static $pb.GeneratedMessage $_createMessage() => ListFeedRequest._();
+  @$core.override
+  ListFeedRequest createEmptyInstance() => ListFeedRequest._();
+  @$core.pragma('dart2js:noInline')
+  static ListFeedRequest getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListFeedRequest>(
+          ListFeedRequest.$_createMessage);
+  static ListFeedRequest? _defaultInstance;
+
+  /// Last seen event ID; empty starts at newest.
+  @$pb.TagNumber(1)
+  $core.String get cursor => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set cursor($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasCursor() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCursor() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get limit => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set limit($core.int value) => $_setSignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasLimit() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLimit() => $_clearField(2);
+}
+
+class ListFeedResponse extends $pb.GeneratedMessage {
+  factory ListFeedResponse({
+    $core.Iterable<TimelineEvent>? events,
+    $core.String? nextCursor,
+  }) {
+    final result = ListFeedResponse._();
+    if (events != null) result.events.addAll(events);
+    if (nextCursor != null) result.nextCursor = nextCursor;
+    return result;
+  }
+
+  ListFeedResponse._();
+
+  factory ListFeedResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFeedResponse()..mergeFromBuffer(data, registry);
+  factory ListFeedResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ListFeedResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ListFeedResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: ListFeedResponse.$_createMessage)
+    ..pPM<TimelineEvent>(1, _omitFieldNames ? '' : 'events',
+        subBuilder: TimelineEvent.$_createMessage)
+    ..aOS(2, _omitFieldNames ? '' : 'nextCursor')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFeedResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ListFeedResponse copyWith(void Function(ListFeedResponse) updates) =>
+      super.copyWith((message) => updates(message as ListFeedResponse))
+          as ListFeedResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ListFeedResponse() / ListFeedResponse.new instead')
+  static ListFeedResponse create() => ListFeedResponse._();
+  static $pb.GeneratedMessage $_createMessage() => ListFeedResponse._();
+  @$core.override
+  ListFeedResponse createEmptyInstance() => ListFeedResponse._();
+  @$core.pragma('dart2js:noInline')
+  static ListFeedResponse getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListFeedResponse>(
+          ListFeedResponse.$_createMessage);
+  static ListFeedResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<TimelineEvent> get events => $_getList(0);
+
+  /// Cursor for the next page (last event ID); empty when exhausted.
+  @$pb.TagNumber(2)
+  $core.String get nextCursor => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set nextCursor($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasNextCursor() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearNextCursor() => $_clearField(2);
+}
+
+class DownloadSharedRequest extends $pb.GeneratedMessage {
+  factory DownloadSharedRequest({
+    $core.String? owner,
+    $core.String? path,
+  }) {
+    final result = DownloadSharedRequest._();
+    if (owner != null) result.owner = owner;
+    if (path != null) result.path = path;
+    return result;
+  }
+
+  DownloadSharedRequest._();
+
+  factory DownloadSharedRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      DownloadSharedRequest()..mergeFromBuffer(data, registry);
+  factory DownloadSharedRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      DownloadSharedRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DownloadSharedRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'fileshare.v1'),
+      createEmptyInstance: DownloadSharedRequest.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'owner')
+    ..aOS(2, _omitFieldNames ? '' : 'path')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DownloadSharedRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DownloadSharedRequest copyWith(
+          void Function(DownloadSharedRequest) updates) =>
+      super.copyWith((message) => updates(message as DownloadSharedRequest))
+          as DownloadSharedRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use DownloadSharedRequest() / DownloadSharedRequest.new instead')
+  static DownloadSharedRequest create() => DownloadSharedRequest._();
+  static $pb.GeneratedMessage $_createMessage() => DownloadSharedRequest._();
+  @$core.override
+  DownloadSharedRequest createEmptyInstance() => DownloadSharedRequest._();
+  @$core.pragma('dart2js:noInline')
+  static DownloadSharedRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DownloadSharedRequest>(
+          DownloadSharedRequest.$_createMessage);
+  static DownloadSharedRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get owner => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set owner($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasOwner() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearOwner() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get path => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set path($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPath() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPath() => $_clearField(2);
 }
 
 const $core.bool _omitFieldNames =

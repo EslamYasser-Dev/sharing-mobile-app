@@ -44,6 +44,15 @@ dependencies:
   path_provider: ^2.1.6
   shared_preferences: ^2.5.5
   flutter_webrtc: ^1.6.2+hotfix.3
+  sqflite: ^2.3.0
+  path: ^1.9.0
+  crypto: ^3.0.3
+  multicast_dns: ^0.3.0
+  http: ^1.2.0
+  google_sign_in: ^6.2.0
+  image: ^4.2.0
+  image_picker: ^1.1.0
+  video_player: ^2.14.1
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +65,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+  mocktail: ^1.0.3
+  sqflite_common_ffi: ^2.3.0
 
 flutter_launcher_icons:
   android: true

@@ -428,3 +428,69 @@ ThemeData buildAppTheme(Brightness brightness) {
     ),
   );
 }
+
+/// Futuristic surface language layered on the landing vocabulary.
+///
+/// Palette values are untouched (they mirror `landing/app/globals.css`);
+/// these helpers only add depth: soft neon glows, gradient hero washes and
+/// rounder panels. All glow alphas stay low so light mode stays calm.
+abstract final class SfsRadii {
+  static const double card = 16;
+  static const double sheet = 20;
+  static const double pill = 999;
+}
+
+abstract final class SfsShadows {
+  static List<BoxShadow> glow(SfsPalette pal, Color color) => [
+        BoxShadow(
+          color: color.withValues(alpha: 0.22),
+          blurRadius: 18,
+          offset: const Offset(0, 6),
+        ),
+      ];
+
+  static List<BoxShadow> card(SfsPalette pal) => [
+        BoxShadow(
+          color: pal.text.withValues(alpha: 0.06),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
+        ),
+      ];
+}
+
+abstract final class SfsDecor {
+  /// Flat landing panel with a soft lift shadow.
+  static BoxDecoration panel(SfsPalette pal, {double radius = SfsRadii.card}) =>
+      BoxDecoration(
+        color: pal.card,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: pal.border),
+        boxShadow: SfsShadows.card(pal),
+      );
+
+  /// Hero wash used behind screen titles: accent glow fading into the
+  /// background, the way the landing fades its hero into the page.
+  static BoxDecoration hero(SfsPalette pal) => BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [pal.accentDim, pal.accentDim.withValues(alpha: 0.02)],
+        ),
+        borderRadius: BorderRadius.circular(SfsRadii.card),
+        border: Border.all(color: pal.accentBorder),
+      );
+
+  /// Active-transfer card: landing panel plus a neon accent edge.
+  static BoxDecoration liveCard(SfsPalette pal, {bool failed = false}) =>
+      BoxDecoration(
+        color: pal.card,
+        borderRadius: BorderRadius.circular(SfsRadii.card),
+        border: Border.all(
+          color: failed ? pal.dangerBorder : pal.accentBorder,
+        ),
+        boxShadow: SfsShadows.glow(
+          pal,
+          failed ? pal.danger : pal.accent,
+        ),
+      );
+}

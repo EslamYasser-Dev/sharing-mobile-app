@@ -350,6 +350,291 @@ abstract class ShareServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.RevokeShareRequest request);
 }
 
+/// SocialService manages follows, per-file visibility, and the upload feed.
+/// Every method requires authentication.
+@$pb.GrpcServiceName('fileshare.v1.SocialService')
+class SocialServiceClient extends $grpc.Client {
+  /// The hostname for this service.
+  static const $core.String defaultHost = '';
+
+  /// OAuth scopes needed for the client.
+  static const $core.List<$core.String> oauthScopes = [
+    '',
+  ];
+
+  SocialServiceClient(super.channel, {super.options, super.interceptors});
+
+  $grpc.ResponseFuture<$0.FollowResponse> follow(
+    $0.FollowRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$follow, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.UnfollowResponse> unfollow(
+    $0.UnfollowRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$unfollow, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.IsFollowingResponse> isFollowing(
+    $0.IsFollowingRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$isFollowing, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.ListFollowersResponse> listFollowers(
+    $0.ListFollowersRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listFollowers, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.ListFollowingResponse> listFollowing(
+    $0.ListFollowingRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listFollowing, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.FileVisibility> setVisibility(
+    $0.SetVisibilityRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$setVisibility, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.FileVisibility> getVisibility(
+    $0.GetVisibilityRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getVisibility, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.ListFeedResponse> listFeed(
+    $0.ListFeedRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listFeed, request, options: options);
+  }
+
+  /// DownloadSharedFile streams another owner's file after re-checking the
+  /// streaming gate. The first chunk carries filename and content type.
+  $grpc.ResponseStream<$0.DownloadChunk> downloadSharedFile(
+    $0.DownloadSharedRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createStreamingCall(
+        _$downloadSharedFile, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
+  // method descriptors
+
+  static final _$follow =
+      $grpc.ClientMethod<$0.FollowRequest, $0.FollowResponse>(
+          '/fileshare.v1.SocialService/Follow',
+          ($0.FollowRequest value) => value.writeToBuffer(),
+          $0.FollowResponse.fromBuffer);
+  static final _$unfollow =
+      $grpc.ClientMethod<$0.UnfollowRequest, $0.UnfollowResponse>(
+          '/fileshare.v1.SocialService/Unfollow',
+          ($0.UnfollowRequest value) => value.writeToBuffer(),
+          $0.UnfollowResponse.fromBuffer);
+  static final _$isFollowing =
+      $grpc.ClientMethod<$0.IsFollowingRequest, $0.IsFollowingResponse>(
+          '/fileshare.v1.SocialService/IsFollowing',
+          ($0.IsFollowingRequest value) => value.writeToBuffer(),
+          $0.IsFollowingResponse.fromBuffer);
+  static final _$listFollowers =
+      $grpc.ClientMethod<$0.ListFollowersRequest, $0.ListFollowersResponse>(
+          '/fileshare.v1.SocialService/ListFollowers',
+          ($0.ListFollowersRequest value) => value.writeToBuffer(),
+          $0.ListFollowersResponse.fromBuffer);
+  static final _$listFollowing =
+      $grpc.ClientMethod<$0.ListFollowingRequest, $0.ListFollowingResponse>(
+          '/fileshare.v1.SocialService/ListFollowing',
+          ($0.ListFollowingRequest value) => value.writeToBuffer(),
+          $0.ListFollowingResponse.fromBuffer);
+  static final _$setVisibility =
+      $grpc.ClientMethod<$0.SetVisibilityRequest, $0.FileVisibility>(
+          '/fileshare.v1.SocialService/SetVisibility',
+          ($0.SetVisibilityRequest value) => value.writeToBuffer(),
+          $0.FileVisibility.fromBuffer);
+  static final _$getVisibility =
+      $grpc.ClientMethod<$0.GetVisibilityRequest, $0.FileVisibility>(
+          '/fileshare.v1.SocialService/GetVisibility',
+          ($0.GetVisibilityRequest value) => value.writeToBuffer(),
+          $0.FileVisibility.fromBuffer);
+  static final _$listFeed =
+      $grpc.ClientMethod<$0.ListFeedRequest, $0.ListFeedResponse>(
+          '/fileshare.v1.SocialService/ListFeed',
+          ($0.ListFeedRequest value) => value.writeToBuffer(),
+          $0.ListFeedResponse.fromBuffer);
+  static final _$downloadSharedFile =
+      $grpc.ClientMethod<$0.DownloadSharedRequest, $0.DownloadChunk>(
+          '/fileshare.v1.SocialService/DownloadSharedFile',
+          ($0.DownloadSharedRequest value) => value.writeToBuffer(),
+          $0.DownloadChunk.fromBuffer);
+}
+
+@$pb.GrpcServiceName('fileshare.v1.SocialService')
+abstract class SocialServiceBase extends $grpc.Service {
+  $core.String get $name => 'fileshare.v1.SocialService';
+
+  SocialServiceBase() {
+    $addMethod($grpc.ServiceMethod<$0.FollowRequest, $0.FollowResponse>(
+        'Follow',
+        follow_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.FollowRequest.fromBuffer(value),
+        ($0.FollowResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.UnfollowRequest, $0.UnfollowResponse>(
+        'Unfollow',
+        unfollow_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.UnfollowRequest.fromBuffer(value),
+        ($0.UnfollowResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.IsFollowingRequest, $0.IsFollowingResponse>(
+            'IsFollowing',
+            isFollowing_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.IsFollowingRequest.fromBuffer(value),
+            ($0.IsFollowingResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.ListFollowersRequest, $0.ListFollowersResponse>(
+            'ListFollowers',
+            listFollowers_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.ListFollowersRequest.fromBuffer(value),
+            ($0.ListFollowersResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$0.ListFollowingRequest, $0.ListFollowingResponse>(
+            'ListFollowing',
+            listFollowing_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $0.ListFollowingRequest.fromBuffer(value),
+            ($0.ListFollowingResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.SetVisibilityRequest, $0.FileVisibility>(
+        'SetVisibility',
+        setVisibility_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.SetVisibilityRequest.fromBuffer(value),
+        ($0.FileVisibility value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.GetVisibilityRequest, $0.FileVisibility>(
+        'GetVisibility',
+        getVisibility_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.GetVisibilityRequest.fromBuffer(value),
+        ($0.FileVisibility value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.ListFeedRequest, $0.ListFeedResponse>(
+        'ListFeed',
+        listFeed_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.ListFeedRequest.fromBuffer(value),
+        ($0.ListFeedResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.DownloadSharedRequest, $0.DownloadChunk>(
+        'DownloadSharedFile',
+        downloadSharedFile_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) =>
+            $0.DownloadSharedRequest.fromBuffer(value),
+        ($0.DownloadChunk value) => value.writeToBuffer()));
+  }
+
+  $async.Future<$0.FollowResponse> follow_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.FollowRequest> $request) async {
+    return follow($call, await $request);
+  }
+
+  $async.Future<$0.FollowResponse> follow(
+      $grpc.ServiceCall call, $0.FollowRequest request);
+
+  $async.Future<$0.UnfollowResponse> unfollow_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.UnfollowRequest> $request) async {
+    return unfollow($call, await $request);
+  }
+
+  $async.Future<$0.UnfollowResponse> unfollow(
+      $grpc.ServiceCall call, $0.UnfollowRequest request);
+
+  $async.Future<$0.IsFollowingResponse> isFollowing_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.IsFollowingRequest> $request) async {
+    return isFollowing($call, await $request);
+  }
+
+  $async.Future<$0.IsFollowingResponse> isFollowing(
+      $grpc.ServiceCall call, $0.IsFollowingRequest request);
+
+  $async.Future<$0.ListFollowersResponse> listFollowers_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.ListFollowersRequest> $request) async {
+    return listFollowers($call, await $request);
+  }
+
+  $async.Future<$0.ListFollowersResponse> listFollowers(
+      $grpc.ServiceCall call, $0.ListFollowersRequest request);
+
+  $async.Future<$0.ListFollowingResponse> listFollowing_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.ListFollowingRequest> $request) async {
+    return listFollowing($call, await $request);
+  }
+
+  $async.Future<$0.ListFollowingResponse> listFollowing(
+      $grpc.ServiceCall call, $0.ListFollowingRequest request);
+
+  $async.Future<$0.FileVisibility> setVisibility_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.SetVisibilityRequest> $request) async {
+    return setVisibility($call, await $request);
+  }
+
+  $async.Future<$0.FileVisibility> setVisibility(
+      $grpc.ServiceCall call, $0.SetVisibilityRequest request);
+
+  $async.Future<$0.FileVisibility> getVisibility_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.GetVisibilityRequest> $request) async {
+    return getVisibility($call, await $request);
+  }
+
+  $async.Future<$0.FileVisibility> getVisibility(
+      $grpc.ServiceCall call, $0.GetVisibilityRequest request);
+
+  $async.Future<$0.ListFeedResponse> listFeed_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.ListFeedRequest> $request) async {
+    return listFeed($call, await $request);
+  }
+
+  $async.Future<$0.ListFeedResponse> listFeed(
+      $grpc.ServiceCall call, $0.ListFeedRequest request);
+
+  $async.Stream<$0.DownloadChunk> downloadSharedFile_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$0.DownloadSharedRequest> $request) async* {
+    yield* downloadSharedFile($call, await $request);
+  }
+
+  $async.Stream<$0.DownloadChunk> downloadSharedFile(
+      $grpc.ServiceCall call, $0.DownloadSharedRequest request);
+}
+
 /// EventsService streams live application events for native clients
 /// (the browser keeps using HTTP Server-Sent Events).
 @$pb.GrpcServiceName('fileshare.v1.EventsService')
