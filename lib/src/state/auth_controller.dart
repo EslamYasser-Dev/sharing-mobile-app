@@ -108,6 +108,22 @@ class AuthController extends Notifier<AuthState> {
     state = const AuthState(AuthStatus.signedOut);
   }
 
+  Future<String?> signUp(String username, String password) async {
+    final api = ref.read(apiClientProvider);
+    final result = await api.register(username, password);
+    if (!result.ok || result.data == null) {
+      return result.error ?? 'Sign-up failed';
+    }
+    final me = await api.me();
+    if (!me.ok || me.data == null) {
+      return me.error ?? 'Unable to load account';
+    }
+    state = AuthState(AuthStatus.signedIn, me.data);
+    ref.read(eventsServiceProvider).start();
+    ref.read(p2pControllerProvider.notifier).start();
+    return null;
+  }
+
   Future<String?> signInWithGoogle() async {
     final googleAuth = ref.read(googleAuthServiceProvider);
     final result = await googleAuth.signInWithGoogle();

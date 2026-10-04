@@ -235,7 +235,8 @@ class HttpUploadService {
     }
 
     final result = await completeSession(session.id);
-    if (result.path != transfer.name) {
+    final reportedName = result.path.split('/').last;
+    if (reportedName != transfer.name) {
       throw StateError('Upload completed but path mismatch');
     }
 

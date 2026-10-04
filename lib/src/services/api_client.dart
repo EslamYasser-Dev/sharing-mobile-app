@@ -155,6 +155,30 @@ class ApiClient {
     );
   }
 
+  Future<ApiResult<TokenResponse>> register(
+    String username,
+    String password,
+  ) async {
+    final result = await _guard(
+      (options) async => (await _conn.auth).register(
+        RegisterRequest()
+          ..username = username
+          ..password = password,
+        options: options,
+      ),
+      authenticated: false,
+    );
+    final user = result.data;
+    if (user == null) {
+      return ApiResult<TokenResponse>(
+        error: result.error,
+        unauthorized: result.unauthorized,
+      );
+    }
+    // A fresh account has no token until the same credentials log in.
+    return login(username, password);
+  }
+
   Future<ApiResult<void>> revoke() async {
     try {
       final options = await _options();

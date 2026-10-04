@@ -231,6 +231,7 @@ class _TransferPillState extends ConsumerState<_TransferPill> {
             SnackBar(
               content: Text(msg),
               behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 5),
               action: transfer.status == TransferStatus.failed &&
                       transfer.canRetry
                   ? SnackBarAction(

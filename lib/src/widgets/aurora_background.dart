@@ -103,8 +103,7 @@ class _AuroraPainter extends CustomPainter {
       Paint()
         ..shader = RadialGradient(colors: [color, color.withValues(alpha: 0)]).createShader(
           Rect.fromCircle(center: center, radius: radius),
-        )
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28),
+        ),
     );
   }
 

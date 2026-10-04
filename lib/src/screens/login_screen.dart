@@ -18,6 +18,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _error;
   bool _busy = false;
   bool _googleBusy = false;
+  bool _createAccount = false;
 
   @override
   void dispose() {
@@ -51,16 +52,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _busy = true;
       _error = null;
     });
-    final err = await ref
-        .read(authControllerProvider.notifier)
-        .signIn(username, password);
+    final err = _createAccount
+        ? await ref
+            .read(authControllerProvider.notifier)
+            .signUp(username, password)
+        : await ref
+            .read(authControllerProvider.notifier)
+            .signIn(username, password);
     if (!mounted) return;
-    if (err != null) {
+                    if (err != null) {
       setState(() {
         _error = err;
         _busy = false;
       });
     }
+  }
+
+  void _toggleCreateAccount() {
+    setState(() {
+      _createAccount = !_createAccount;
+      _error = null;
+    });
   }
 
   @override
@@ -165,7 +177,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Sign in'),
+                        : Text(_createAccount ? 'Create account' : 'Sign in'),
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: (_busy || _googleBusy)
+                        ? null
+                        : _toggleCreateAccount,
+                    child: Text(
+                      _createAccount
+                          ? 'Already have an account? Sign in'
+                          : 'Need an account? Create one',
+                      style: TextStyle(
+                        color: pal.accent,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   if (GoogleAuthService.isConfigured) ...[
