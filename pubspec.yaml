@@ -50,7 +50,7 @@ dependencies:
   multicast_dns: ^0.3.0
   http: ^1.2.0
   google_sign_in: ^6.2.0
-  image: ^4.2.0
+  image: ^4.10.1
   image_picker: ^1.1.0
   video_player: ^2.14.1
   sqflite_common_ffi: ^2.4.3
