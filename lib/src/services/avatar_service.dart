@@ -67,9 +67,13 @@ class AvatarService {
     // Strip EXIF/metadata by re-encoding
     _stripMetadata(image, mimeType);
 
+    // Determine effective encoding format: WebP falls back to JPEG since
+    // the image package doesn't support WebP encoding, so normalize mime type.
+    final effectiveMime = mimeType == 'image/webp' ? 'image/jpeg' : mimeType;
+
     // Generate thumbnail
     final thumbnail = img.copyResize(image, width: _thumbnailDimension, height: _thumbnailDimension);
-    final thumbnailBytes = _encodeImage(thumbnail, mimeType);
+    final thumbnailBytes = _encodeImage(thumbnail, effectiveMime);
 
     // Resize main image if needed
     img.Image processedImage = image;
@@ -77,7 +81,7 @@ class AvatarService {
       processedImage = img.copyResize(image, width: _maxDimension, height: _maxDimension);
     }
 
-    final processedBytes = _encodeImage(processedImage, mimeType);
+    final processedBytes = _encodeImage(processedImage, effectiveMime);
 
     // Compute hashes for integrity
     final fullHash = await IntegrityService.computeBytesHash(Uint8List.fromList(processedBytes));
@@ -87,7 +91,7 @@ class AvatarService {
       originalBytes: bytes,
       processedBytes: processedBytes,
       thumbnailBytes: thumbnailBytes,
-      mimeType: mimeType,
+      mimeType: effectiveMime,
       width: processedImage.width,
       height: processedImage.height,
       fullHash: fullHash,

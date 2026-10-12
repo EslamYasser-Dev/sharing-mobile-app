@@ -17,7 +17,7 @@ class MdnsDiscoveryService {
   })  : _serviceType = serviceType ?? '_fileshare._tcp.local.',
         _instanceName = instanceName ?? 'FileShare-${DateTime.now().millisecondsSinceEpoch}',
         _port = port ?? 0,
-        _txtRecord = txtRecord ?? {},
+        _txtRecord = txtRecord != null ? Map<String, String>.from(txtRecord) : {},
         _queryInterval = queryInterval ?? const Duration(seconds: 30),
         _announceInterval = announceInterval ?? const Duration(seconds: 60);
 
