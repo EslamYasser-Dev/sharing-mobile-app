@@ -51,7 +51,7 @@ dependencies:
   http: ^1.2.0
   google_sign_in: ^6.2.0
   image: ^4.2.0
-  image_picker: ^1.1.0
+  image_picker: ^1.2.4
   video_player: ^2.14.1
   sqflite_common_ffi: ^2.4.3
   permission_handler: ^13.0.2
